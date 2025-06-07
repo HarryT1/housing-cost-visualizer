@@ -8,6 +8,24 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - pgdata:/var/lib/postgresql/data 
+    
+  backend:
+    build: ./backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DB_HOST: db
+      DB_PORT: 5432
+      FLASK_ENV: development
+      FLASK_DEBUG: 1
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
  
 volumes:
   pgdata:

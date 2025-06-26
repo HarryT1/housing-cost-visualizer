@@ -1,5 +1,3 @@
-CREATE DATABASE sampledb;
-
 \c sampledb
 
 CREATE TABLE apartment_sales (
@@ -14,6 +12,7 @@ CREATE TABLE apartment_sales (
   rooms REAL
 );
 
+/*
 INSERT INTO apartment_sales (
   sale_date, address, municipality, neighborhood, sale_type, price, area_sqm, rooms
 ) VALUES
@@ -27,3 +26,4 @@ INSERT INTO apartment_sales (
 ('2025-04-16', 'Atlasgatan 13', 'Stockholm', 'Vasastan', 'Slutpris', 3400000, 25.0, 1.5),
 ('2025-04-16', 'Charlottenburgsvägen 32C', 'Solna', 'Råsunda', 'Sista bud', 2550000, 36.0, 1.0),
 ('2025-04-16', 'Kungsholms Hamnplan 5A', 'Stockholm', 'Kungsholmen', 'Sista bud', 7985000, 64.0, 2.0);
+*/

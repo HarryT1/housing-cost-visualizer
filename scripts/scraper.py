@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import math
 from datetime import datetime, timedelta
 import time
+from dotenv import load_dotenv
+from pathlib import Path
 
 time_period_days = 90
 

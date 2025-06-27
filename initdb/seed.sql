@@ -1,18 +1,21 @@
 \c sampledb
 
 CREATE TABLE apartment_sales (
-  id SERIAL PRIMARY KEY,
+  id INTEGER PRIMARY KEY,
   sale_date DATE,
-  address TEXT,
   municipality TEXT,
   neighborhood TEXT,
+  address TEXT,
+  latitude REAL,
+  longitude REAL,
   sale_type TEXT,
   price INTEGER,
   area_sqm REAL,
-  rooms REAL
+  rooms REAL,
+  floor REAL
 );
 
-/*
+/* Not updated to new schema yet
 INSERT INTO apartment_sales (
   sale_date, address, municipality, neighborhood, sale_type, price, area_sqm, rooms
 ) VALUES

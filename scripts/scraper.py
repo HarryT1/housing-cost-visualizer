@@ -7,6 +7,7 @@ import psycopg2
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+import json
 
 # Connect to db
 script_dir = Path(__file__).resolve().parent
@@ -24,17 +25,32 @@ cur = conn.cursor()
 
 cur.execute("SELECT MAX(sale_date) FROM apartment_sales")
 latest_date_in_db = cur.fetchone()[0]
-print(latest_date_in_db)
 if latest_date_in_db:
-    start_date = (latest_date_in_db + timedelta(days=1)).strftime('%Y-%m-%d')
+    start_date = (latest_date_in_db + timedelta(days=1)).strftime("%Y-%m-%d")
 else:
     # Fallback to default, e.g., 90 days ago
     time_period_days = 90
-    start_date = (datetime.today() - timedelta(days=time_period_days)).strftime('%Y-%m-%d')
+    start_date = (datetime.today() - timedelta(days=time_period_days)).strftime("%Y-%m-%d")
     
-end_date = (datetime.today()- timedelta(days = 1)).strftime('%Y-%m-%d')
+end_date = (datetime.today()- timedelta(days = 1)).strftime("%Y-%m-%d")
 
 url = f"https://www.booli.se/sok/slutpriser?areaIds=2&maxSoldDate={end_date}&minSoldDate={start_date}&objectType=L%C3%A4genhet"
+headers = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/125.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Referer": "https://www.booli.se/",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+    "Connection": "keep-alive"
+}
 response = requests.get(url)
 
 if response.status_code != 200:
@@ -42,13 +58,13 @@ if response.status_code != 200:
     
 
 
-soup = BeautifulSoup(response.text, 'html.parser')
-page_count = int(soup.find('div', class_='search-page__content').find('p', class_='m-2').get_text().split()[-1])
+soup = BeautifulSoup(response.text, "html.parser")
+page_count = int(soup.find("div", class_="search-page__content").find("p", class_="m-2").get_text().split()[-1])
 
 
 # Used for cleaning up the strings in the for loop to be able to convert to int/float
 remove_chars = dict.fromkeys(map(ord, "  krm²rum"), None)
-remove_chars[ord(',')] = ord('.')
+remove_chars[ord(",")] = ord(".")
 
 
 
@@ -59,50 +75,55 @@ for page in range(1, page_count+1):
         print(f"Error fetching page: {page}")
         continue
     
-    soup = BeautifulSoup(response.text, 'html.parser')
-    properties = soup.find('div', class_ = ['pb-4', 'md:pb-6']).find_all('li', class_='search-page__module-container')
+    soup = BeautifulSoup(response.text, "html.parser")
     print("Current page: ", page)
+    
+    # Find json containing the desired data
+    script_tag = soup.find("script", id="__NEXT_DATA__")
+    data = json.loads(script_tag.string)
 
-    for property in properties:
-        
-        address = property.find('a', class_= 'expanded-link no-underline hover:underline').get_text(strip=True)
-        
-        loc_info = property.find('span', class_ = "object-card__preamble").get_text().split(" · ")
-        # Municipality seemed to always be the last element of this html element
-        municipality = loc_info[-1] 
-        specific_area = "Unspecified"
-        # Most apartments have 3 fields in this html element, with specific area being the second, in case they dont, assume area is unspecified
-        if len(loc_info) == 3:
-            specific_area = loc_info[1]
-        
-        # String specifying whether the listed property was actually sold 
-        # or if the price is just the last bid before listing was removed
-        sold_or_last_bid = property.find('div', class_=['tag', 'tag--dark', 'tag--with-icon']).get_text()
-        date = property.find('span', class_='object-card__date__logo').get_text()
-        
-        price_string = property.find('span', class_ = 'object-card__price__logo').get_text()
-        price = int(price_string.translate(remove_chars))
+    props = data.get("props", {})
+    pageProps = props.get("pageProps", {})
+    listings = pageProps.get("__APOLLO_STATE__", {})
 
-        # Some properties don't have defined sqm or number of rooms
-        try: property_info = property.find('ul', class_='object-card__data-list').find_all('li')
-        except: 
-            sq_meters = float('nan')
-            room_count = float('nan')
-        
-        try: sq_meters = float(property_info[0].get_text().translate(remove_chars))
-        except(IndexError, ValueError): sq_meters = float('nan')
-        try: room_count = float(property_info[1].get_text().translate(remove_chars))
-        except(IndexError, ValueError): room_count = float('nan')
-        
-        insert_query = """
-            INSERT INTO apartment_sales (sale_date, address, municipality, neighborhood, sale_type, price, area_sqm, rooms)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """
+    # Go through each sold property and collect data
+    for key, value in listings.items():
+        if key.startswith("SoldProperty:"):
+            id = value.get("id")
+            sale_date = value.get("soldDate")
+            municipality = value.get("location").get("region").get("municipalityName")
+            specific_area = value.get("descriptiveAreaName")
+            address = value.get("streetAddress")
+            latitude = value.get("latitude")
+            longitude = value.get("longitude")
+            sale_type = value.get("soldPriceType")
+            price = int(value.get("soldPrice").get("raw"))
+            
+            
+            # Extract info about sqm, room count, and floor
+            area_sqm = float("nan")
+            room_count = float("nan")
+            floor = float("nan")
+            property_info = value.get("displayAttributes").get("dataPoints")
+            for info in property_info:
+                datapoint = info.get("value").get("plainText")
+                datapoint = datapoint.replace("\xa0", " ").lower()
+                if "m²" in datapoint and "kr" not in datapoint:
+                    area_sqm = float(datapoint.split()[0].replace(",","."))
+                elif "rum" in datapoint:
+                    room_count = float(datapoint.split()[0].replace(",","."))
+                elif "vån" in datapoint:
+                    floor = float(datapoint.split()[1].replace(",","."))
+            insert_query = """
+                INSERT INTO apartment_sales (id, sale_date, municipality, neighborhood, address, latitude, longitude, sale_type, price, area_sqm, rooms, floor)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            
+            values = (id, sale_date, municipality, specific_area, address, latitude, longitude, sale_type, price, area_sqm, room_count, floor)
 
-        values = (date, address, municipality, specific_area, sold_or_last_bid, price, sq_meters, room_count)
-
-        cur.execute(insert_query, values)
-        conn.commit()
+            cur.execute(insert_query, values)
+            conn.commit()
+        
         
 cur.close()
 conn.close()

@@ -1,80 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Leaflet Map Starter</title>
-    <!-- Leaflet CSS (local file) -->
-    <link rel="stylesheet" href="leaflet/leaflet.css" />
-    <style>
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-        }
-
-        #map {
-            height: 50%;
-            width: 50%;
-            border-radius: 10px;
-            top:25%;
-            left:25%;
-        }
-    </style>
-</head>
-
-<body>
-    <h1>Testing</h1>
-    <div id="map"></div>
-
-    <!-- Leaflet JS (local file) -->
-    <script src="leaflet/leaflet.js"></script>
-    <script>
-
-        var map = L.map('map').setView([59.334591, 18.063240], 10);
-
-        var tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-
-
-        
-
-        function getColor(d) {
-            return d > 180 ? '#800026' :
-                d > 170 ? '#BD0026' :
-                    d > 160 ? '#E31A1C' :
-                        d > 150 ? '#FC4E2A' :
-                            d > 140 ? '#FD8D3C' :
-                                d > 115 ? '#FEB24C' :
-                                    d > 100 ? '#FED976' :
-                                        '#FFEDA0';
-
-        }
-
-        function style(feature) {
-            return {
-                fillColor: getColor(feature.properties.kom_code),
-                weight: 1,
-                opacity: 1,
-                color: 'white',
-                dashArray: '3',
-                fillOpacity: 0.7
-            };
-        }
-
-        fetch('./data/stockholm_municipalities.geojson')
-            .then(response => response.json())  // Parse the response as JSON
-            .then(municipalityData => {
-                L.geoJson(municipalityData).addTo(map);
-                L.geoJson(municipalityData, { style: style }).addTo(map);
-            })
-            .catch(error => console.error('Error loading GeoJSON:', error));
-        
-
-    </script>
-</body>
-
+    <title>Vite + React + TS</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

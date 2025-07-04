@@ -25,10 +25,21 @@ services:
       DB_PORT: 5432
       FLASK_ENV: development
       FLASK_DEBUG: 1
+      TRUSTED_ORIGINS: ${TRUSTED_ORIGINS} 
     ports:
       - "5000:5000"
     volumes:
       - ./backend:/app
+
+  frontend:
+    build: ./frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
  
 volumes:
   pgdata:

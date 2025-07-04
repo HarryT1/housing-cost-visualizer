@@ -27,7 +27,6 @@ const LeafletMap = () => {
       style={{
         height: "100%",
         position: "absolute",
-        top: "0%",
         left: "16rem",
         right: 0
       }}

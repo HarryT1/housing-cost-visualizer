@@ -7,7 +7,7 @@ const App = () => {
 
   const [data, setData] = useState<any>(null);
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/")
+    fetch("http://localhost:5000/helloworld")
       .then(res => res.json())
       .then(setData);
   }, []);

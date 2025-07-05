@@ -23,13 +23,13 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       DB_HOST: db
       DB_PORT: 5432
-      FLASK_ENV: development
-      FLASK_DEBUG: 1
       TRUSTED_ORIGINS: ${TRUSTED_ORIGINS} 
+      ASPNETCORE_ENVIRONMENT: Development
     ports:
       - "5000:5000"
     volumes:
-      - ./backend:/app
+    - ./backend:/app  # mount source for live editing
+    
 
   frontend:
     build: ./frontend

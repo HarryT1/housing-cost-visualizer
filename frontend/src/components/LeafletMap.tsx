@@ -1,8 +1,7 @@
 // LeafletMap.tsx
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Calculator } from "lucide-react";
 
 const LeafletMap = () => {
   const mapRef = useRef<HTMLDivElement | null>(null);

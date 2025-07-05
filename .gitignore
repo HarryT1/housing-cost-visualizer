@@ -135,6 +135,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+scrapervenv/
 
 # Spyder project settings
 .spyderproject
@@ -199,3 +200,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+### DotnetCore ###
+# .NET Core build folders
+backend/bin/
+backend/obj/

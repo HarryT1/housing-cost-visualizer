@@ -18,7 +18,7 @@ function formatDate(date: Date | undefined) {
     return ""
   }
 
-  return date.toLocaleDateString("se-SE", {
+  return date.toLocaleDateString("sv-SE", {
     day: "2-digit",
     month: "long",
     year: "numeric",

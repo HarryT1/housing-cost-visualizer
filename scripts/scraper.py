@@ -101,9 +101,9 @@ for page in range(1, page_count+1):
             
             
             # Extract info about sqm, room count, and floor
-            area_sqm = float("nan")
-            room_count = float("nan")
-            floor = float("nan")
+            area_sqm = None
+            room_count = None
+            floor = None
             property_info = value.get("displayAttributes").get("dataPoints")
             for info in property_info:
                 datapoint = info.get("value").get("plainText")

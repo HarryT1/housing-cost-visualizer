@@ -1,4 +1,5 @@
 \c sampledb
+CREATE EXTENSION postgis;
 
 CREATE TABLE apartment_sales (
   id INTEGER PRIMARY KEY,
@@ -6,13 +7,13 @@ CREATE TABLE apartment_sales (
   municipality TEXT,
   neighborhood TEXT,
   address TEXT,
-  latitude REAL,
-  longitude REAL,
+  latitude double precision,
+  longitude double precision,
   sale_type TEXT,
   price INTEGER,
-  area_sqm REAL,
-  rooms REAL,
-  floor REAL
+  area_sqm double precision,
+  rooms double precision,
+  floor double precision
 );
 
 /* Not updated to new schema yet

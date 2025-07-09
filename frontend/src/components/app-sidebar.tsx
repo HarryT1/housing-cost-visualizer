@@ -24,13 +24,16 @@ import {
 
 import { Calendar } from "@/components/ui/calendar"
 
-import { useState } from "react";
+import React, { useState } from "react";
 
 import { Calendar28 } from "@/components/date-picker";
 import { Button } from "./ui/button";
 
+interface AppSidebarProps {
+  setShowGrid: React.Dispatch<React.SetStateAction<boolean>>;
+}
 
-export function AppSidebar() {
+export function AppSidebar({setShowGrid} : AppSidebarProps) {
   const [date, setDate] = useState<Date | undefined>(new Date())
   return (
     <Sidebar collapsible="none">
@@ -65,7 +68,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton>
+                <SidebarMenuButton onClick={() => setShowGrid(prev => !prev)}>
                   <MapPinned />
                   <span>Geografisk uppdelning</span>
                 </SidebarMenuButton>

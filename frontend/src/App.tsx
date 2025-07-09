@@ -5,11 +5,12 @@ import { useEffect, useState } from "react";
 
 const App = () => {
 
+  const [showGrid, setShowGrid] = useState(false)
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar setShowGrid = {setShowGrid} />
       <div style={{ display: "flex", height: "100vh", margin: 0, zIndex: 0 }}>
-        <LeafletMap />
+        <LeafletMap showGrid = {showGrid}/>
       </div>
     </SidebarProvider>
   );

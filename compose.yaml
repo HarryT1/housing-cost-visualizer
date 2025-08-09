@@ -25,6 +25,7 @@ services:
       DB_PORT: 5432
       TRUSTED_ORIGINS: ${TRUSTED_ORIGINS} 
       ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://0.0.0.0:5000
     ports:
       - "5000:5000"
     

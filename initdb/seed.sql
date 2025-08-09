@@ -13,8 +13,11 @@ CREATE TABLE apartment_sales (
   price INTEGER,
   area_sqm double precision,
   rooms double precision,
-  floor double precision
+  floor double precision,
+  GridX INTEGER GENERATED ALWAYS AS (FLOOR(longitude / (0.01751 * 0.1))) STORED,
+  GridY INTEGER GENERATED ALWAYS AS (FLOOR(latitude / (0.008983 * 0.1))) STORED
 );
+/* 0.01751 and 0.008983 come from an approximation of 1km in long/lat degrees for the geographical area of stockholm */
 
 /* Not updated to new schema yet
 INSERT INTO apartment_sales (

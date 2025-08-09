@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import L, { geoJson } from "leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import * as turf from "@turf/turf";
 
@@ -13,33 +13,31 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
   const layerRef = useRef<L.GeoJSON | null>(null);
 
   function getColor(d: number) {
-    return d > 75000
-      ? "#08306b"
-      : d > 65000
-        ? "#08519c"
-        : d > 55000
-          ? "#2171b5"
-          : d > 50000
-            ? "#4292c6"
-            : d > 45000
-              ? "#6baed6"
-              : d > 40000
-                ? "#9ecae1"
-                : d > 35000
-                  ? "#c6dbef"
-                  : "#deebf7";
+    return d > 120000 ? "#08306b" :  // darkest blue, above 120k
+      d > 110000 ? "#084594" :
+        d > 100000 ? "#0868ac" :
+          d > 90000 ? "#2b8cbe" :
+            d > 80000 ? "#4ba3d9" :
+              d > 70000 ? "#69b3e7" :
+                d > 60000 ? "#8cc6f2" :
+                  d > 50000 ? "#add8ff" :
+                    d > 40000 ? "#cde9ff" :
+                      d > 30000 ? "#e7f3ff" :   // light blue for 30k-40k
+                        "#f0f8ff";  // *lightest* blue for below 30k
   }
 
   function style(feature: any) {
     return {
-      fillColor: getColor(feature.properties.avg_price_per_sqm),
+      fillColor: getColor(feature.properties.averagePricePerSqm),
       weight: 1,
       opacity: 1,
-      color: "white",
-      dashArray: "3",
+      color: "black",
       fillOpacity: 0.7,
     };
   }
+
+
+
 
   const initMap = () => {
     if (mapRef.current && !mapInstanceRef.current) {
@@ -60,16 +58,18 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
     const municipalityGeoData = (await geoRes.json()) as GeoJSON.FeatureCollection;
     const municipalityAvgSqmPrice: Record<string, number> = await dataRes.json();
 
+
     const modifiedGeoJson = {
       ...municipalityGeoData,
       features: municipalityGeoData.features.map((feature: any) => {
         const komName = feature.properties.kom_name;
         const avgPrice = municipalityAvgSqmPrice[komName];
+
         return {
           ...feature,
           properties: {
             ...feature.properties,
-            avg_price_per_sqm: avgPrice,
+            averagePricePerSqm: avgPrice,
           },
         };
       }),
@@ -90,19 +90,17 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
       fetch("http://localhost:5000/PropertyListing/BoundingBox")
     ]);
     const geojson = await geoRes.json();
-    const {minLng, minLat, maxLng, maxLat} = await bboxRes.json();
+    const { minLng, minLat, maxLng, maxLat } = await bboxRes.json();
 
     // Approximate stepsizes in latitude and longitude based on cellsize in km
     const cellSize = 2 // Cell size in km
     const latStep = 0.008983 * cellSize;
     const lngStep = 0.01751 * cellSize;
-
-    // Get boundingbox of geograpgical region
-    
-
     const gridCells: GeoJSON.Feature<GeoJSON.Polygon>[] = [];
 
     // Loop over bounding box using approximate degree steps
+    let allCoords: { minLng: string, maxLng: string, minLat: string, maxLat: string }[] = []
+
     for (let lng = minLng; lng < maxLng; lng += lngStep) {
       for (let lat = minLat; lat < maxLat; lat += latStep) {
         const cellCoords: [number, number][] = [
@@ -112,6 +110,14 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
           [lng, lat + latStep],
           [lng, lat],
         ];
+        let cellCoordsDict =
+        {
+          "minLng": lng,
+          "maxLng": lng + lngStep,
+          "minLat": lat,
+          "maxLat": lat + latStep
+        }
+
 
         const cellPolygon: GeoJSON.Feature<GeoJSON.Polygon> = {
           type: "Feature",
@@ -122,16 +128,41 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
           properties: {},
         };
 
-        // Only add a cell if it exists within the geographical region (Stockholm)
+        // Only add a cell if it exists within the geographical region in geojson
         if (turf.booleanIntersects(cellPolygon, geojson)) {
           gridCells.push(cellPolygon);
+          allCoords.push(cellCoordsDict)
         }
       }
     }
 
+    const averageSqmPricePerGrid = await fetch("http://localhost:5000/PropertyListing/GridSqmPrices", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(
+        allCoords
+      ),
+    });
+
+    const averages = await averageSqmPricePerGrid.json()
+    const filteredFeatures = gridCells
+      .map((feature, index) => {
+        // Add info to properties
+        return {
+          ...feature,
+          properties: {
+            ...feature.properties,
+            averagePricePerSqm: averages[index].averagePricePerSqm,
+            propertyCount: averages[index].propertyCount
+          },
+        };
+      })
+      .filter(feature => feature.properties.averagePricePerSqm !== -1);
     const gridFeatureCollection: GeoJSON.FeatureCollection<GeoJSON.Polygon> = {
       type: "FeatureCollection",
-      features: gridCells,
+      features: filteredFeatures,
     };
 
     if (layerRef.current && mapInstanceRef.current) {
@@ -141,12 +172,7 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
 
     if (mapInstanceRef.current) {
       layerRef.current = L.geoJSON(gridFeatureCollection, {
-        style: {
-          color: "#000",
-          weight: 0.5,
-          fillColor: "#ccc",
-          fillOpacity: 0.3,
-        },
+        style,
       }).addTo(mapInstanceRef.current);
     }
   };
@@ -166,6 +192,7 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
       } else {
         await renderMunicipalities();
       }
+
     };
 
     fetchDataAndRender();

@@ -13,7 +13,11 @@ services:
       - "5432:5432" 
     
   backend:
-    build: ./backend
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    volumes:
+      - ./backend:/src       # Mount source for live reload
+    working_dir: /src
+    command: dotnet watch run --urls=http://0.0.0.0:5000
     restart: always
     depends_on:
       - db
@@ -23,8 +27,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       DB_HOST: db
       DB_PORT: 5432
-      TRUSTED_ORIGINS: ${TRUSTED_ORIGINS} 
-      ASPNETCORE_ENVIRONMENT: Production
+      TRUSTED_ORIGINS: ${TRUSTED_ORIGINS}
+      ASPNETCORE_ENVIRONMENT: Development
     ports:
       - "5000:5000"
     

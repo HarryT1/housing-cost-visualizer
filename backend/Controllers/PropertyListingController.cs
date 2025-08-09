@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using backend.Models;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
 
 
 namespace backend.Controllers;
@@ -80,6 +82,57 @@ public class PropertyListingController : ControllerBase
             return NotFound("No polygon could be generated.");
 
         return Content(result, "application/json");
+    }
+
+
+    public class AggregatedResult
+    {
+        public double AveragePricePerSqm { get; set; }
+        public int PropertyCount { get; set; }
+    }
+
+
+
+    public class GridCell
+    {
+        public double MinLng { get; set; }
+        public double MaxLng { get; set; }
+        public double MinLat { get; set; }
+        public double MaxLat { get; set; }
+    }
+
+    [HttpPost("GridSqmPrices")]
+    public async Task<ActionResult<List<int>>> AggregatePricesSimple([FromBody] List<GridCell> gridCells)
+    {
+        var minLng = gridCells.Min(c => c.MinLng);
+        var maxLng = gridCells.Max(c => c.MaxLng);
+        var minLat = gridCells.Min(c => c.MinLat);
+        var maxLat = gridCells.Max(c => c.MaxLat);
+        
+        var properties = await _context.Properties
+            .Where(p => p.Longitude.HasValue && p.Latitude.HasValue
+                        && p.Price.HasValue && p.AreaSqm.HasValue && p.AreaSqm.Value > 0 && p.SaleType == "Slutpris")
+            .Where(p => p.Longitude >= minLng && p.Longitude < maxLng
+                        && p.Latitude >= minLat && p.Latitude < maxLat)
+            .ToListAsync();
+
+        var results = new List<AggregatedResult>();
+
+        foreach (var cell in gridCells)
+        {
+            var propertiesInCell = properties
+                .Where(p => p.Longitude >= cell.MinLng && p.Longitude < cell.MaxLng
+                         && p.Latitude >= cell.MinLat && p.Latitude < cell.MaxLat)
+                .ToList();
+
+            var avgPrice = propertiesInCell.Count > 0
+                ? propertiesInCell.Average(p => p.Price.Value / p.AreaSqm.Value)
+                : -1;
+
+            results.Add(new AggregatedResult { AveragePricePerSqm = avgPrice, PropertyCount = propertiesInCell.Count });
+        }
+
+        return Ok(results);
     }
 
 

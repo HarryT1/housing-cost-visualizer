@@ -1,9 +1,14 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0
-WORKDIR /app
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
 
 COPY *.csproj ./
 RUN dotnet restore
 
 COPY . ./
+RUN dotnet publish --configuration Release --output /app/publish
 
-CMD ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:5000"]
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "backend.dll"]
+

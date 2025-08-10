@@ -42,13 +42,12 @@ public class PropertyListingController : ControllerBase
     [HttpGet("BoundingBox")]
     public async Task<ActionResult<Dictionary<string, double>>> GetBoundingBox()
     {
-        var query = _context.Properties
-        .Where(p => p.Latitude.HasValue && p.Longitude.HasValue);
+        var query = _context.Properties;
 
-        var minLat = await query.MinAsync(p => p.Latitude.Value);
-        var minLng = await query.MinAsync(p => p.Longitude.Value);
-        var maxLat = await query.MaxAsync(p => p.Latitude.Value);
-        var maxLng = await query.MaxAsync(p => p.Longitude.Value);
+        var minLat = await query.MinAsync(p => p.Latitude);
+        var minLng = await query.MinAsync(p => p.Longitude);
+        var maxLat = await query.MaxAsync(p => p.Latitude);
+        var maxLng = await query.MaxAsync(p => p.Longitude);
 
         var bbox = new Dictionary<string, double>
         {
@@ -85,52 +84,30 @@ public class PropertyListingController : ControllerBase
     }
 
 
-    public class AggregatedResult
-    {
-        public double AveragePricePerSqm { get; set; }
-        public int PropertyCount { get; set; }
-    }
-
-
-
-    public class GridCell
-    {
-        public double MinLng { get; set; }
-        public double MaxLng { get; set; }
-        public double MinLat { get; set; }
-        public double MaxLat { get; set; }
-    }
-
     [HttpPost("GridSqmPrices")]
-    public async Task<ActionResult<List<int>>> AggregatePricesSimple([FromBody] List<GridCell> gridCells)
+    // Cellscale determines the resulting grid cell sizes, the smallest possible grid cells 
+    // come with cellScale = 1 with grids of 100mx100m and cellScale = 5 results in 500mx500m grid cells etc.
+    public async Task<ActionResult<List<int>>> GridSqmPrices([FromBody] int cellScale)
     {
-        var minLng = gridCells.Min(c => c.MinLng);
-        var maxLng = gridCells.Max(c => c.MaxLng);
-        var minLat = gridCells.Min(c => c.MinLat);
-        var maxLat = gridCells.Max(c => c.MaxLat);
-        
-        var properties = await _context.Properties
-            .Where(p => p.Longitude.HasValue && p.Latitude.HasValue
-                        && p.Price.HasValue && p.AreaSqm.HasValue && p.AreaSqm.Value > 0 && p.SaleType == "Slutpris")
-            .Where(p => p.Longitude >= minLng && p.Longitude < maxLng
-                        && p.Latitude >= minLat && p.Latitude < maxLat)
-            .ToListAsync();
 
-        var results = new List<AggregatedResult>();
-
-        foreach (var cell in gridCells)
+        if (cellScale <= 0 || cellScale > 50)
         {
-            var propertiesInCell = properties
-                .Where(p => p.Longitude >= cell.MinLng && p.Longitude < cell.MaxLng
-                         && p.Latitude >= cell.MinLat && p.Latitude < cell.MaxLat)
-                .ToList();
-
-            var avgPrice = propertiesInCell.Count > 0
-                ? propertiesInCell.Average(p => p.Price.Value / p.AreaSqm.Value)
-                : -1;
-
-            results.Add(new AggregatedResult { AveragePricePerSqm = avgPrice, PropertyCount = propertiesInCell.Count });
+            return BadRequest("cellScale must be an integer between the values 1 and 50.");
         }
+
+        var results = await _context.Properties
+            .Where(p => p.Price.HasValue && p.AreaSqm.HasValue && p.AreaSqm.Value > 0 && p.SaleType == "Slutpris")
+            .GroupBy(p => new { NewGridX = p.GridX / cellScale, NewGridY = p.GridY / cellScale })
+            .Select(g => new
+            {
+                g.Key.NewGridX,
+                g.Key.NewGridY,
+                AveragePricePerSqm = g.Average(p => p.Price.Value / p.AreaSqm.Value),
+                Count = g.Count(),
+                MinPricePerSqm = g.Min(p => p.Price.Value / p.AreaSqm.Value),
+                MaxPricePerSqm = g.Max(p => p.Price.Value / p.AreaSqm.Value)
+            })
+        .ToListAsync();
 
         return Ok(results);
     }

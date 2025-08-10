@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import L from "leaflet";
+import L, { Control } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import * as turf from "@turf/turf";
 
@@ -35,8 +35,6 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
       fillOpacity: 0.7,
     };
   }
-
-
 
 
   const initMap = () => {
@@ -90,51 +88,13 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
       fetch("http://localhost:5000/PropertyListing/BoundingBox")
     ]);
     const geojson = await geoRes.json();
-    const { minLng, minLat, maxLng, maxLat } = await bboxRes.json();
+    //const { minLng, minLat, maxLng, maxLat } = await bboxRes.json();
 
     // Approximate stepsizes in latitude and longitude based on cellsize in km
-    const cellSize = 2 // Cell size in km
+    const cellSize = 0.2 // Cell size in km, minimum of 0.1, maximum of 5 (step size 0.1)
     const latStep = 0.008983 * cellSize;
     const lngStep = 0.01751 * cellSize;
     const gridCells: GeoJSON.Feature<GeoJSON.Polygon>[] = [];
-
-    // Loop over bounding box using approximate degree steps
-    let allCoords: { minLng: string, maxLng: string, minLat: string, maxLat: string }[] = []
-
-    for (let lng = minLng; lng < maxLng; lng += lngStep) {
-      for (let lat = minLat; lat < maxLat; lat += latStep) {
-        const cellCoords: [number, number][] = [
-          [lng, lat],
-          [lng + lngStep, lat],
-          [lng + lngStep, lat + latStep],
-          [lng, lat + latStep],
-          [lng, lat],
-        ];
-        let cellCoordsDict =
-        {
-          "minLng": lng,
-          "maxLng": lng + lngStep,
-          "minLat": lat,
-          "maxLat": lat + latStep
-        }
-
-
-        const cellPolygon: GeoJSON.Feature<GeoJSON.Polygon> = {
-          type: "Feature",
-          geometry: {
-            type: "Polygon",
-            coordinates: [cellCoords],
-          },
-          properties: {},
-        };
-
-        // Only add a cell if it exists within the geographical region in geojson
-        if (turf.booleanIntersects(cellPolygon, geojson)) {
-          gridCells.push(cellPolygon);
-          allCoords.push(cellCoordsDict)
-        }
-      }
-    }
 
     const averageSqmPricePerGrid = await fetch("http://localhost:5000/PropertyListing/GridSqmPrices", {
       method: "POST",
@@ -142,27 +102,57 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(
-        allCoords
+        cellSize * 10
       ),
     });
 
-    const averages = await averageSqmPricePerGrid.json()
-    const filteredFeatures = gridCells
-      .map((feature, index) => {
-        // Add info to properties
-        return {
-          ...feature,
-          properties: {
-            ...feature.properties,
-            averagePricePerSqm: averages[index].averagePricePerSqm,
-            propertyCount: averages[index].propertyCount
-          },
-        };
-      })
-      .filter(feature => feature.properties.averagePricePerSqm !== -1);
+    interface GridCellData {
+      newGridX: number;
+      newGridY: number;
+      averagePricePerSqm: number;
+      count: number;
+      minPricePerSqm: number;
+      maxPricePerSqm: number;
+    }
+    const gridData: GridCellData[] = await averageSqmPricePerGrid.json()
+
+    for (const cell of gridData) {
+      const minLng = cell.newGridX * lngStep;
+      const maxLng = (cell.newGridX + 1) * lngStep;
+      const minLat = cell.newGridY * latStep;
+      const maxLat = (cell.newGridY + 1) * latStep;
+
+      const cellCoords: [number, number][] = [
+        [minLng, minLat], //polygon startingpoint
+        [maxLng, minLat],
+        [maxLng, maxLat],
+        [minLng, maxLat],
+        [minLng, minLat], // close the polygon
+      ];
+      
+      const cellPolygon: GeoJSON.Feature<GeoJSON.Polygon> = {
+        type: "Feature",
+        geometry: {
+          type: "Polygon",
+          coordinates: [cellCoords],
+        },
+        properties: {
+          averagePricePerSqm: cell.averagePricePerSqm,
+          maxPricePerSqm: cell.maxPricePerSqm,
+          minPricePerSqm: cell.minPricePerSqm,
+          count: cell.count
+        },
+      };
+
+      if (turf.booleanIntersects(cellPolygon, geojson)) {
+        gridCells.push(cellPolygon);
+      }
+    }
+
+
     const gridFeatureCollection: GeoJSON.FeatureCollection<GeoJSON.Polygon> = {
       type: "FeatureCollection",
-      features: filteredFeatures,
+      features: gridCells,
     };
 
     if (layerRef.current && mapInstanceRef.current) {

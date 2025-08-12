@@ -12,6 +12,8 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.GeoJSON | null>(null);
 
+
+
   function getColor(d: number) {
     return d > 120000 ? "#08306b" :  // darkest blue, above 120k
       d > 110000 ? "#084594" :
@@ -22,8 +24,8 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
                 d > 60000 ? "#8cc6f2" :
                   d > 50000 ? "#add8ff" :
                     d > 40000 ? "#cde9ff" :
-                      d > 30000 ? "#e7f3ff" :   // light blue for 30k-40k
-                        "#f0f8ff";  // *lightest* blue for below 30k
+                      d > 30000 ? "#e7f3ff" :
+                        "#f0f8ff"; // Lightest blue, below 30k
   }
 
   function style(feature: any) {
@@ -37,16 +39,105 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
   }
 
 
+  const info = new Control({}) as L.Control & { _div?: HTMLDivElement; update: (props?: any) => void };
+
+  info.onAdd = function () {
+    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+    this.update();
+    return this._div;
+  };
+
+  // Method for updating info control in top right corner to include more information about sold properties
+  info.update = function (props) {
+    if (!this._div) return;
+    if(showGrid){
+      this._div.innerHTML = '<h4>Genomsnittligt kvadratmeterpris</h4>' + (props ?
+      Math.round(props.averagePricePerSqm) + ' kr/m<sup>2</sup> <br\><br\>' +
+      `<h4> Antal bostäder </h4> ${props.count} sålda bostäder <br\><br\>` +
+      `<h4> Högsta kvadratmeterpris i området </h4> ${Math.round(props.maxPricePerSqm)} kr / m<sup>2</sup> <br\><br\>` + 
+      `<h4> Lägsta kvadratmeterpris i området </h4> ${Math.round(props.minPricePerSqm)} kr / m<sup>2</sup>`
+      : `Håll musen över en ruta för mer info`);
+    }
+    else{
+      this._div.innerHTML = '<h4>Genomsnittligt kvadratmeterpris</h4>' + (props ?
+      Math.round(props.averagePricePerSqm) + ' kr / m<sup>2</sup> <br\>'
+      : `Håll musen över en kommun för mer info`);
+    }
+    
+  };
+
+
+  // Code for creating the legend showing the number ranges for each color
+  var legend = new Control({ position: 'bottomright' });
+
+  legend.onAdd = function () {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+      grades = [0, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 110000, 120000],
+      labels = [];
+
+    // loop through price intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+      div.innerHTML +=
+        '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+        grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+
+    return div;
+  };
+
+
+
   const initMap = () => {
     if (mapRef.current && !mapInstanceRef.current) {
-      mapInstanceRef.current = L.map(mapRef.current).setView([59.334591, 18.06324], 10);
+      mapInstanceRef.current = L.map(mapRef.current).setView([59.334591, 18.10324], 12);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 15,
         attribution: "© OpenStreetMap contributors",
       }).addTo(mapInstanceRef.current);
       L.control.scale().addTo(mapInstanceRef.current);
+
+      legend.addTo(mapInstanceRef.current);
+
+      info.addTo(mapInstanceRef.current);
+
     }
   };
+
+
+
+  function highlightFeature(e: L.LeafletMouseEvent) {
+    var layer = e.target;
+
+    layer.setStyle({
+      weight: 3,
+      color: '#FFF',
+      dashArray: '',
+      fillOpacity: 0.7
+    });
+
+    layer.bringToFront();
+    info.update(layer.feature.properties);
+
+  }
+
+  function resetHighlight(e: L.LeafletMouseEvent) {
+    if (layerRef.current)
+      layerRef.current.resetStyle(e.target);
+    var layer = e.target;
+    info.update(layer.feature.properties);
+  }
+
+
+  function onEachFeature(feature: GeoJSON.Feature, layer: L.Layer) {
+    layer.on({
+      mouseover: highlightFeature,
+      mouseout: resetHighlight,
+    });
+  }
+
+
+
 
   const renderMunicipalities = async () => {
     const [geoRes, dataRes] = await Promise.all([
@@ -77,7 +168,7 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
       if (layerRef.current) {
         mapInstanceRef.current.removeLayer(layerRef.current);
       }
-      layerRef.current = L.geoJSON(modifiedGeoJson, { style }).addTo(mapInstanceRef.current);
+      layerRef.current = L.geoJSON(modifiedGeoJson, { style, onEachFeature: onEachFeature }).addTo(mapInstanceRef.current);
     }
   };
 
@@ -91,7 +182,7 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
     //const { minLng, minLat, maxLng, maxLat } = await bboxRes.json();
 
     // Approximate stepsizes in latitude and longitude based on cellsize in km
-    const cellSize = 0.2 // Cell size in km, minimum of 0.1, maximum of 5 (step size 0.1)
+    const cellSize = 0.5 // Cell size in km, minimum of 0.1, maximum of 5 (step size 0.1)
     const latStep = 0.008983 * cellSize;
     const lngStep = 0.01751 * cellSize;
     const gridCells: GeoJSON.Feature<GeoJSON.Polygon>[] = [];
@@ -129,7 +220,7 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
         [minLng, maxLat],
         [minLng, minLat], // close the polygon
       ];
-      
+
       const cellPolygon: GeoJSON.Feature<GeoJSON.Polygon> = {
         type: "Feature",
         geometry: {
@@ -155,15 +246,12 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
       features: gridCells,
     };
 
-    if (layerRef.current && mapInstanceRef.current) {
-      mapInstanceRef.current.removeLayer(layerRef.current);
-      layerRef.current = null;
-    }
-
     if (mapInstanceRef.current) {
-      layerRef.current = L.geoJSON(gridFeatureCollection, {
-        style,
-      }).addTo(mapInstanceRef.current);
+      if (layerRef.current) {
+        mapInstanceRef.current.removeLayer(layerRef.current);
+      }
+      layerRef.current = L.geoJSON(gridFeatureCollection, { style, onEachFeature: onEachFeature })
+        .addTo(mapInstanceRef.current);
     }
   };
 

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 const App = () => {
 
-  const [showGrid, setShowGrid] = useState(false)
+  const [showGrid, setShowGrid] = useState(true)
   return (
     <SidebarProvider>
       <AppSidebar setShowGrid = {setShowGrid} />

@@ -26,6 +26,7 @@ services:
       TRUSTED_ORIGINS: ${TRUSTED_ORIGINS} 
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://0.0.0.0:5000
+      SERVER_IP: ${SERVER_IP}
     ports:
       - "5000:5000"
     
@@ -37,8 +38,8 @@ services:
       - backend
     ports:
       - "3000:3000"
-    volumes:
-      - ./frontend:/app
+    environment:
+      VITE_SERVER_IP: ${SERVER_IP}
  
 volumes:
   pgdata:

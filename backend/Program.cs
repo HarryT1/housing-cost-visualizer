@@ -4,13 +4,14 @@ using backend.Models;
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
+var serverIp = Environment.GetEnvironmentVariable("SERVER_IP");
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.WithOrigins("http://localhost:3000")
+                          policy.WithOrigins("http://" + serverIp + ":3000")
                                 .AllowAnyMethod()
                                 .AllowAnyHeader();
                       });

@@ -1,4 +1,4 @@
-\c sampledb
+\c server_db
 CREATE EXTENSION postgis;
 
 CREATE TABLE apartment_sales (

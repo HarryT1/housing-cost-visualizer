@@ -6,6 +6,7 @@ import * as turf from "@turf/turf";
 interface LeafletMapProps {
   showGrid: boolean; // true = show grid, false = show municipalities
 }
+const serverIp = import.meta.env.VITE_SERVER_IP
 
 const LeafletMap = ({ showGrid }: LeafletMapProps) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -142,7 +143,7 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
   const renderMunicipalities = async () => {
     const [geoRes, dataRes] = await Promise.all([
       fetch("./data/stockholm_municipalities.geojson"),
-      fetch("http://localhost:5000/PropertyListing/AvgSqmPriceByMunicipality"),
+      fetch(`http://${serverIp}:5000/PropertyListing/AvgSqmPriceByMunicipality`),
     ]);
     const municipalityGeoData = (await geoRes.json()) as GeoJSON.FeatureCollection;
     const municipalityAvgSqmPrice: Record<string, number> = await dataRes.json();
@@ -175,8 +176,8 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
   const renderGrid = async () => {
     // Get geographical data about stockholms län
     const [geoRes, bboxRes] = await Promise.all([
-      fetch("http://localhost:5000/PropertyListing/Polygon"),
-      fetch("http://localhost:5000/PropertyListing/BoundingBox")
+      fetch(`http://${serverIp}:5000/PropertyListing/Polygon`),
+      fetch(`http://${serverIp}:5000/PropertyListing/BoundingBox`)
     ]);
     const geojson = await geoRes.json();
     //const { minLng, minLat, maxLng, maxLat } = await bboxRes.json();
@@ -186,8 +187,7 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
     const latStep = 0.008983 * cellSize;
     const lngStep = 0.01751 * cellSize;
     const gridCells: GeoJSON.Feature<GeoJSON.Polygon>[] = [];
-
-    const averageSqmPricePerGrid = await fetch("http://localhost:5000/PropertyListing/GridSqmPrices", {
+    const averageSqmPricePerGrid = await fetch(`http://${serverIp}:5000/PropertyListing/GridSqmPrices`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

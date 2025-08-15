@@ -21,7 +21,7 @@ export default defineConfig({
     strictPort: true,
     host: true,
     origin: "http://0.0.0.0:3000",
-    allowedHosts: ['localhost', 'harrythulin.com']
+    allowedHosts: ['localhost', 'harrythulin.com', 'www.harrythulin.com']
   },
 })
 

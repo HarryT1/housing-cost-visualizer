@@ -96,7 +96,7 @@ public class PropertyListingController : ControllerBase
         }
 
         var results = await _context.Properties
-            .Where(p => p.Price.HasValue && p.AreaSqm.HasValue && p.AreaSqm.Value > 0 && p.SaleType == "Slutpris")
+            .Where(p => p.Price.HasValue && p.AreaSqm.HasValue && p.AreaSqm.Value > 0 && (p.SaleType == "Slutpris" || p.SaleType == "Lagfart"))
             .GroupBy(p => new { NewGridX = p.GridX / cellScale, NewGridY = p.GridY / cellScale })
             .Select(g => new
             {

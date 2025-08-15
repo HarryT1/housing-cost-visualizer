@@ -8,6 +8,10 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 import json
+import argparse
+
+
+
 
 # Connect to db
 script_dir = Path(__file__).resolve().parent
@@ -23,18 +27,34 @@ conn = psycopg2.connect(
 
 cur = conn.cursor()
 
-cur.execute("SELECT MAX(sale_date) FROM apartment_sales")
-latest_date_in_db = cur.fetchone()[0]
-if latest_date_in_db:
-    start_date = (latest_date_in_db + timedelta(days=1)).strftime("%Y-%m-%d")
-else:
-    # Fallback to default, e.g., 90 days ago
-    time_period_days = 90
-    start_date = (datetime.today() - timedelta(days=time_period_days)).strftime("%Y-%m-%d")
+cur.execute("""
+    SELECT MIN(sale_date), MAX(sale_date)
+    FROM apartment_sales
+""")
+earliest_date_in_db, latest_date_in_db = cur.fetchone()
+
+parser = argparse.ArgumentParser(description="ArgParser for startdate of the scrape")
+
+parser.add_argument("--startDate", help="The date from which you want the scraper to start")
+
+args = parser.parse_args()
+
+if args.startDate is None:
+    # Check if db was empty
+    if latest_date_in_db:
+        start_date = (latest_date_in_db + timedelta(days=1)).strftime("%Y-%m-%d")
+    else:
+        # Fallback to default, e.g., 90 days ago
+        time_period_days = 30
+        start_date = (datetime.today() - timedelta(days=time_period_days)).strftime("%Y-%m-%d") 
     
+else:
+    start_date = args.startDate
+
 end_date = (datetime.today()- timedelta(days = 1)).strftime("%Y-%m-%d")
 
-url = f"https://www.booli.se/sok/slutpriser?areaIds=2&maxSoldDate={end_date}&minSoldDate={start_date}&objectType=L%C3%A4genhet"
+
+url = f"https://www.booli.se/sok/slutpriser?areaIds=2&maxSoldDate={end_date}&minSoldDate={start_date}"
 headers = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -68,9 +88,10 @@ remove_chars[ord(",")] = ord(".")
 
 
 
-for page in range(1, page_count+1):
-    url = f"https://www.booli.se/sok/slutpriser?areaIds=2&maxSoldDate={end_date}&minSoldDate={start_date}&objectType=L%C3%A4genhet&page={page}"
+for page in range(page_count, 0, -1):
+    url = f"https://www.booli.se/sok/slutpriser?areaIds=2&maxSoldDate={end_date}&minSoldDate={start_date}&page={page}"
     response = requests.get(url)
+    
     if response.status_code != 200:
         print(f"Error fetching page: {page}")
         continue
@@ -92,6 +113,7 @@ for page in range(1, page_count+1):
             id = value.get("id")
             sale_date = value.get("soldDate")
             municipality = value.get("location").get("region").get("municipalityName")
+            property_type = value.get("objectType")
             specific_area = value.get("descriptiveAreaName")
             address = value.get("streetAddress")
             latitude = value.get("latitude")
@@ -105,21 +127,46 @@ for page in range(1, page_count+1):
             room_count = None
             floor = None
             property_info = value.get("displayAttributes").get("dataPoints")
-            for info in property_info:
-                datapoint = info.get("value").get("plainText")
-                datapoint = datapoint.replace("\xa0", " ").lower()
-                if "m²" in datapoint and "kr" not in datapoint:
-                    area_sqm = float(datapoint.split()[0].replace(",","."))
-                elif "rum" in datapoint:
-                    room_count = float(datapoint.split()[0].replace(",","."))
-                elif "vån" in datapoint:
-                    floor = float(datapoint.split()[1].replace(",","."))
+            
+            if property_type == "Lägenhet":
+                for info in property_info:
+                    datapoint = info.get("value").get("plainText")
+                    datapoint = datapoint.replace("\xa0", " ").lower()
+                    if "m²" in datapoint and "kr" not in datapoint and "tomt" not in datapoint:
+                        if "+" in datapoint:
+                            area_sqm = float(datapoint.split()[0].replace(",",".")) + float(datapoint.split()[2].replace(",","."))
+                        else: 
+                            area_sqm = float(datapoint.split()[0].replace(",","."))
+                    elif "rum" in datapoint:
+                        room_count = float(datapoint.split()[0].replace(",","."))
+                    elif "vån" in datapoint:
+                        floor = float(datapoint.split()[1].replace(",","."))
+            elif property_type == "Villa":
+                continue
+            elif property_type == "Radhus":
+                continue
+            else:
+                continue
             insert_query = """
-                INSERT INTO apartment_sales (id, sale_date, municipality, neighborhood, address, latitude, longitude, sale_type, price, area_sqm, rooms, floor)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO apartment_sales (id, property_type, sale_date, municipality, neighborhood, address, latitude, longitude, sale_type, price, area_sqm, rooms, floor)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (id)
+                DO UPDATE SET
+                property_type = EXCLUDED.property_type,
+                sale_date = EXCLUDED.sale_date,
+                municipality = EXCLUDED.municipality,
+                neighborhood = EXCLUDED.neighborhood,
+                address = EXCLUDED.address,
+                latitude = EXCLUDED.latitude,
+                longitude = EXCLUDED.longitude,
+                sale_type = EXCLUDED.sale_type,
+                price = EXCLUDED.price,
+                area_sqm = EXCLUDED.area_sqm,
+                rooms = EXCLUDED.rooms,
+                floor = EXCLUDED.floor;
             """
             
-            values = (id, sale_date, municipality, specific_area, address, latitude, longitude, sale_type, price, area_sqm, room_count, floor)
+            values = (id, property_type, sale_date, municipality, specific_area, address, latitude, longitude, sale_type, price, area_sqm, room_count, floor)
 
             cur.execute(insert_query, values)
             conn.commit()

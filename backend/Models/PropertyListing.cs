@@ -3,6 +3,7 @@ namespace backend.Models;
 public class PropertyListing
 {
     public int Id { get; set; }
+    public string? PropertyType { get; set; }
     public DateTime SaleDate { get; set; }
     public string? Municipality { get; set; }
     public string? Neighborhood { get; set; }

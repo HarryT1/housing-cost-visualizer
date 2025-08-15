@@ -3,6 +3,7 @@ CREATE EXTENSION postgis;
 
 CREATE TABLE apartment_sales (
   id INTEGER PRIMARY KEY,
+  property_type TEXT,
   sale_date DATE,
   municipality TEXT,
   neighborhood TEXT,

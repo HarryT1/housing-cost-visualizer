@@ -11,6 +11,7 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.GeoJSON | null>(null);
+  const infoRef = useRef<L.Control & { _div?: HTMLDivElement; update: (props?: any) => void } | null>(null);
 
 
 
@@ -48,42 +49,44 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
   };
 
   // Method for updating info control in top right corner to include more information about sold properties
-  info.update = function (props) {
-    if (!this._div) return;
-    if(showGrid){
-      this._div.innerHTML = '<h4>Genomsnittligt kvadratmeterpris</h4>' + (props ?
-      Math.round(props.averagePricePerSqm) + ' kr/m<sup>2</sup> <br\><br\>' +
-      `<h4> Antal bostäder </h4> ${props.count} sålda bostäder <br\><br\>` +
-      `<h4> Högsta kvadratmeterpris i området </h4> ${Math.round(props.maxPricePerSqm)} kr / m<sup>2</sup> <br\><br\>` + 
-      `<h4> Lägsta kvadratmeterpris i området </h4> ${Math.round(props.minPricePerSqm)} kr / m<sup>2</sup>`
-      : `Håll musen över en ruta för mer info`);
-    }
-    else{
-      this._div.innerHTML = '<h4>Genomsnittligt kvadratmeterpris</h4>' + (props ?
-      Math.round(props.averagePricePerSqm) + ' kr / m<sup>2</sup> <br\>'
-      : `Håll musen över en kommun för mer info`);
-    }
-    
+  const initInfoControl = () => {
+    const info = new Control({}) as L.Control & { _div?: HTMLDivElement; update: (props?: any) => void };
+    info.onAdd = function () {
+      this._div = L.DomUtil.create('div', 'info');
+      this.update();
+      return this._div;
+    };
+    info.update = function (props) {
+      if (!this._div) return;
+      if (showGrid) {
+        this._div.innerHTML = '<h4>Genomsnittligt kvadratmeterpris</h4>' + (props ?
+          `${Math.round(props.averagePricePerSqm)} kr/m<sup>2</sup> <br><br>
+        <h4>Antal bostäder</h4> ${props.count} sålda bostäder <br><br>
+        <h4>Högsta kvadratmeterpris i området</h4> ${Math.round(props.maxPricePerSqm)} kr / m<sup>2</sup> <br><br>
+        <h4>Lägsta kvadratmeterpris i området</h4> ${Math.round(props.minPricePerSqm)} kr / m<sup>2</sup>`
+          : `Håll musen över en ruta för mer info`);
+      } else {
+        this._div.innerHTML = '<h4>Genomsnittligt kvadratmeterpris</h4>' + (props ?
+          `${Math.round(props.averagePricePerSqm)} kr / m<sup>2</sup> <br><br>` + 
+          '<h4>Kommun</h4>' + props.kom_name
+          : `Håll musen över en kommun för mer info`);
+      }
+    };
+    return info;
   };
 
-
-  // Code for creating the legend showing the number ranges for each color
-  var legend = new Control({ position: 'bottomright' });
-
-  legend.onAdd = function () {
-
-    var div = L.DomUtil.create('div', 'info legend'),
-      grades = [0, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 110000, 120000],
-      labels = [];
-
-    // loop through price intervals and generate a label with a colored square for each interval
-    for (var i = 0; i < grades.length; i++) {
-      div.innerHTML +=
-        '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-        grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
-    }
-
-    return div;
+  const initLegend = () => {
+    const legend = new Control({ position: 'bottomright' });
+    legend.onAdd = function () {
+      const div = L.DomUtil.create('div', 'info legend');
+      const grades = [0, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 110000, 120000];
+      for (let i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+          `<i style="background:${getColor(grades[i] + 1)}"></i> ${grades[i]}${grades[i + 1] ? `&ndash;${grades[i + 1]}<br>` : '+'}`;
+      }
+      return div;
+    };
+    return legend;
   };
 
 
@@ -96,10 +99,10 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
         attribution: "© OpenStreetMap contributors",
       }).addTo(mapInstanceRef.current);
       L.control.scale().addTo(mapInstanceRef.current);
-
+      const legend = initLegend();
       legend.addTo(mapInstanceRef.current);
-
-      info.addTo(mapInstanceRef.current);
+      infoRef.current = initInfoControl();
+      infoRef.current.addTo(mapInstanceRef.current);
 
     }
   };
@@ -117,15 +120,15 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
     });
 
     layer.bringToFront();
-    info.update(layer.feature.properties);
+    infoRef.current?.update(layer.feature.properties);
 
   }
 
   function resetHighlight(e: L.LeafletMouseEvent) {
     if (layerRef.current)
       layerRef.current.resetStyle(e.target);
-    var layer = e.target;
-    info.update(layer.feature.properties);
+
+    infoRef.current?.update();
   }
 
 
@@ -257,13 +260,34 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
 
   useEffect(() => {
     const fetchDataAndRender = async () => {
-      initMap();
+      if (!mapInstanceRef.current) {
+        initMap();
+      } else {
+        // Recreate and re-add info control
+        if (infoRef.current) {
+          mapInstanceRef.current?.removeControl(infoRef.current);
+        }
+        infoRef.current = initInfoControl();
+        infoRef.current.addTo(mapInstanceRef.current!);
+      }
 
       // Remove old layer if exists
       if (layerRef.current && mapInstanceRef.current) {
+        layerRef.current.eachLayer((layer) => {
+          layer.off({
+            mouseover: highlightFeature,
+            mouseout: resetHighlight,
+          })
+        });
         mapInstanceRef.current.removeLayer(layerRef.current);
         layerRef.current = null;
       }
+
+
+
+
+
+
 
       if (showGrid) {
         await renderGrid();

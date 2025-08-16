@@ -6,7 +6,6 @@ import * as turf from "@turf/turf";
 interface LeafletMapProps {
   showGrid: boolean; // true = show grid, false = show municipalities
 }
-const serverIp = import.meta.env.VITE_SERVER_IP
 
 const LeafletMap = ({ showGrid }: LeafletMapProps) => {
   const mapRef = useRef<HTMLDivElement | null>(null);

@@ -60,14 +60,14 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
       if (!this._div) return;
       if (showGrid) {
         this._div.innerHTML = '<h4>Genomsnittligt kvadratmeterpris</h4>' + (props ?
-          `${Math.round(props.averagePricePerSqm)} kr/m<sup>2</sup> <br><br>
+          `${Math.round(props.averagePricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup> <br><br>
         <h4>Antal bostäder</h4> ${props.count} sålda bostäder <br><br>
-        <h4>Högsta kvadratmeterpris i området</h4> ${Math.round(props.maxPricePerSqm)} kr / m<sup>2</sup> <br><br>
-        <h4>Lägsta kvadratmeterpris i området</h4> ${Math.round(props.minPricePerSqm)} kr / m<sup>2</sup>`
+        <h4>Högsta kvadratmeterpris i området</h4> ${Math.round(props.maxPricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup> <br><br>
+        <h4>Lägsta kvadratmeterpris i området</h4> ${Math.round(props.minPricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup>`
           : `Håll musen över en ruta för mer info`);
       } else {
         this._div.innerHTML = '<h4>Genomsnittligt kvadratmeterpris</h4>' + (props ?
-          `${Math.round(props.averagePricePerSqm)} kr / m<sup>2</sup> <br><br>` + 
+          `${Math.round(props.averagePricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup> <br><br>` +
           '<h4>Kommun</h4>' + props.kom_name
           : `Håll musen över en kommun för mer info`);
       }
@@ -81,8 +81,10 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
       const div = L.DomUtil.create('div', 'info legend');
       const grades = [0, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 110000, 120000];
       for (let i = 0; i < grades.length; i++) {
+        const from = grades[i].toLocaleString("sv-SE");
+        const to = grades[i + 1] ? grades[i + 1].toLocaleString("sv-SE") : null;
         div.innerHTML +=
-          `<i style="background:${getColor(grades[i] + 1)}"></i> ${grades[i]}${grades[i + 1] ? `&ndash;${grades[i + 1]}<br>` : '+'}`;
+          `<i style="background:${getColor(grades[i] + 1)}"></i> ${from}${to ? `&ndash;${to}<br>` : '+'}`;
       }
       return div;
     };

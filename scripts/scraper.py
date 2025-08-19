@@ -45,7 +45,7 @@ if args.startDate is None:
         start_date = (latest_date_in_db + timedelta(days=1)).strftime("%Y-%m-%d")
     else:
         # Fallback to default, e.g., 90 days ago
-        time_period_days = 30
+        time_period_days = 90
         start_date = (datetime.today() - timedelta(days=time_period_days)).strftime("%Y-%m-%d") 
     
 else:

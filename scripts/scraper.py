@@ -109,7 +109,8 @@ for page in range(page_count, 0, -1):
     response.raise_for_status()
     
     soup = BeautifulSoup(response.text, "html.parser")
-    print("Current page: ", page)
+    
+    
     
     # Find json containing the desired data
     script_tag = soup.find("script", id="__NEXT_DATA__")
@@ -118,6 +119,12 @@ for page in range(page_count, 0, -1):
     props = data.get("props", {})
     pageProps = props.get("pageProps", {})
     listings = pageProps.get("__APOLLO_STATE__", {})
+    
+    key, value = next(
+    ((k, v) for k, v in listings.items() if k.startswith("SoldProperty:")),
+    (None, None))
+    date = value.get("soldDate")
+    print(f"Current page: {page} Date: {date}")
 
     # Go through each sold property and collect data
     for key, value in listings.items():

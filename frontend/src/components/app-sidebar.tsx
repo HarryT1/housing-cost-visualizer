@@ -1,4 +1,4 @@
-import { CalendarRange, MapPinned, SlidersHorizontal } from "lucide-react"
+import { CalendarRange, MapPinned, SlidersHorizontal, Plus, Minus } from "lucide-react"
 
 import {
   Sidebar,
@@ -12,6 +12,8 @@ import {
   SidebarMenuItem,
   SidebarTrigger
 } from "@/components/ui/sidebar"
+
+import { Slider } from "@/components/ui/slider"
 
 import {
   DropdownMenu,
@@ -33,10 +35,13 @@ import { Button } from "./ui/button";
 
 interface AppSidebarProps {
   setShowGrid: React.Dispatch<React.SetStateAction<boolean>>;
+  setCellSize: React.Dispatch<React.SetStateAction<number>>;
+  cellSize: number;
 }
 
-export function AppSidebar({setShowGrid} : AppSidebarProps) {
+export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProps) {
   const [date, setDate] = useState<Date | undefined>(new Date())
+  const [tempCellSize, setTempCellSize] = useState<number>(0.2);
   return (
     <Sidebar>
       <SidebarHeader>Välj inställningar</SidebarHeader>
@@ -90,6 +95,14 @@ export function AppSidebar({setShowGrid} : AppSidebarProps) {
                     <DropdownMenuItem>Test</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                Rutstorlek: {tempCellSize} x {tempCellSize} km<sup>2</sup>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton>
+                  <Slider defaultValue={[cellSize*10]} max={50} min={1} step={1} onValueChange={val => setTempCellSize(val[0]/10)} onValueCommit={() => setCellSize(tempCellSize)}/>
+                </SidebarMenuButton>
               </SidebarMenuItem>
 
             </SidebarMenu>

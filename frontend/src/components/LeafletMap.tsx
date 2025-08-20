@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, React } from "react";
 import L, { Control } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import * as turf from "@turf/turf";
@@ -6,9 +6,10 @@ import * as turf from "@turf/turf";
 interface LeafletMapProps {
   showGrid: boolean; // true = show grid, false = show municipalities
   className?: string;
+  cellSize: number; // Cell size of grid in km, minimum of 0.1, maximum of 5 (step size 0.1)
 }
 
-const LeafletMap = ({ showGrid, className }: LeafletMapProps) => {
+const LeafletMap = ({ showGrid, className, cellSize}: LeafletMapProps) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.GeoJSON | null>(null);
@@ -192,7 +193,7 @@ const LeafletMap = ({ showGrid, className }: LeafletMapProps) => {
     //const { minLng, minLat, maxLng, maxLat } = await bboxRes.json();
 
     // Approximate stepsizes in latitude and longitude based on cellsize in km
-    const cellSize = 0.5 // Cell size in km, minimum of 0.1, maximum of 5 (step size 0.1)
+    console.log(cellSize)
     const latStep = 0.008983 * cellSize;
     const lngStep = 0.01751 * cellSize;
     const gridCells: GeoJSON.Feature<GeoJSON.Polygon>[] = [];
@@ -304,7 +305,7 @@ const LeafletMap = ({ showGrid, className }: LeafletMapProps) => {
     };
 
     fetchDataAndRender();
-  }, [showGrid]);
+  }, [showGrid, cellSize]);
 
   return (
     <div

@@ -7,13 +7,14 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 const App = () => {
 
   const [showGrid, setShowGrid] = useState(true)
+  const [cellSize, setCellSize] = useState(0.2)
   return (
     <SidebarProvider>
-      <AppSidebar setShowGrid={setShowGrid} />
+      <AppSidebar setShowGrid={setShowGrid} setCellSize={setCellSize} cellSize ={cellSize}/>
       <div className="relative z-10">
         <SidebarTrigger />
       </div>
-      <LeafletMap className="absolute inset-0 z-0" showGrid={showGrid} />
+      <LeafletMap className="absolute inset-0 z-0" showGrid={showGrid} cellSize = {cellSize}/>
     </SidebarProvider>
   );
 };

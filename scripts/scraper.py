@@ -1,4 +1,6 @@
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 import math
 from datetime import datetime, timedelta
@@ -42,7 +44,7 @@ args = parser.parse_args()
 if args.startDate is None:
     # Check if db was empty
     if latest_date_in_db:
-        start_date = (latest_date_in_db + timedelta(days=1)).strftime("%Y-%m-%d")
+        start_date = (latest_date_in_db).strftime("%Y-%m-%d")
     else:
         # Fallback to default, e.g., 90 days ago
         time_period_days = 90
@@ -87,14 +89,24 @@ remove_chars = dict.fromkeys(map(ord, "  krm²rum"), None)
 remove_chars[ord(",")] = ord(".")
 
 
+# Configure retries with backoff
+retry_strategy = Retry(
+    total=5,
+    backoff_factor=1,
+    status_forcelist=[429, 500, 502, 503, 504],
+    allowed_methods=["GET"]
+)
+
+adapter = HTTPAdapter(max_retries=retry_strategy)
+session = requests.Session()
+session.mount("http://", adapter)
+session.mount("https://", adapter)
+
 
 for page in range(page_count, 0, -1):
     url = f"https://www.booli.se/sok/slutpriser?areaIds=2&maxSoldDate={end_date}&minSoldDate={start_date}&page={page}"
-    response = requests.get(url)
-    
-    if response.status_code != 200:
-        print(f"Error fetching page: {page}")
-        continue
+    response = session.get(url, timeout=10)
+    response.raise_for_status()
     
     soup = BeautifulSoup(response.text, "html.parser")
     print("Current page: ", page)

@@ -34,8 +34,9 @@ services:
     
 
   frontend:
-    build: ./frontend
-    restart: always
+    image: node:24-bullseye
+    working_dir: /app
+    command: sh -c "npm ci && npm run dev"
     depends_on:
       - backend
     ports:

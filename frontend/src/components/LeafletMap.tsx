@@ -193,7 +193,6 @@ const LeafletMap = ({ showGrid, className, cellSize}: LeafletMapProps) => {
     //const { minLng, minLat, maxLng, maxLat } = await bboxRes.json();
 
     // Approximate stepsizes in latitude and longitude based on cellsize in km
-    console.log(cellSize)
     const latStep = 0.008983 * cellSize;
     const lngStep = 0.01751 * cellSize;
     const gridCells: GeoJSON.Feature<GeoJSON.Polygon>[] = [];

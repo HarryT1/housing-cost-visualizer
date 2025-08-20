@@ -5,9 +5,10 @@ import * as turf from "@turf/turf";
 
 interface LeafletMapProps {
   showGrid: boolean; // true = show grid, false = show municipalities
+  className?: string;
 }
 
-const LeafletMap = ({ showGrid }: LeafletMapProps) => {
+const LeafletMap = ({ showGrid, className }: LeafletMapProps) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.GeoJSON | null>(null);
@@ -95,7 +96,11 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
 
   const initMap = () => {
     if (mapRef.current && !mapInstanceRef.current) {
-      mapInstanceRef.current = L.map(mapRef.current).setView([59.334591, 18.10324], 12);
+      mapInstanceRef.current = L.map(mapRef.current, {
+        center: [59.334591, 18.10324],
+        zoom: 12,
+        zoomControl: false,
+      });
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 15,
         attribution: "© OpenStreetMap contributors",
@@ -303,14 +308,9 @@ const LeafletMap = ({ showGrid }: LeafletMapProps) => {
 
   return (
     <div
+      className={className || "h-full absolute left-64 right-0"}
       id="map"
       ref={mapRef}
-      style={{
-        height: "100%",
-        position: "absolute",
-        left: "16rem",
-        right: 0,
-      }}
     />
   );
 };

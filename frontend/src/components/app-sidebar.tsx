@@ -6,9 +6,11 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger
 } from "@/components/ui/sidebar"
 
 import {
@@ -36,11 +38,11 @@ interface AppSidebarProps {
 export function AppSidebar({setShowGrid} : AppSidebarProps) {
   const [date, setDate] = useState<Date | undefined>(new Date())
   return (
-    <Sidebar collapsible="none">
+    <Sidebar>
+      <SidebarHeader>Välj inställningar</SidebarHeader>
       <SidebarContent>
         
         <SidebarGroup>
-          <SidebarGroupLabel>Välj inställningar</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
 

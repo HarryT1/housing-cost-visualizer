@@ -32,6 +32,7 @@ import React, { useState } from "react";
 
 import { Calendar28 } from "@/components/date-picker";
 import { Button } from "./ui/button";
+import { filterProperties } from "@turf/turf"
 
 interface AppSidebarProps {
   setShowGrid: React.Dispatch<React.SetStateAction<boolean>>;
@@ -40,8 +41,9 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProps) {
-  const [date, setDate] = useState<Date | undefined>(new Date())
-  const [tempCellSize, setTempCellSize] = useState<number>(0.2);
+  const [toDate, setToDate] = useState<Date | undefined>(new Date())
+  const [fromDate, setFromDate] = useState<Date | undefined>(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000))
+  const [tempCellSize, setTempCellSize] = useState<number>(cellSize);
   return (
     <Sidebar>
       <SidebarHeader>Välj inställningar</SidebarHeader>
@@ -54,18 +56,18 @@ export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProp
               <SidebarMenuItem>
                 <DropdownMenu >
                   <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton>
+                    <SidebarMenuButton onClick={()=> console.log("cringe")}>
                       <SlidersHorizontal />
                       <span>Tidsperiod</span>
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="right">
-                    <div className = "px-2 py-1.5">
+                    <div className = "px-2 py-1.5 z-10">
                       {/* Get the date from 90 days ago */}
-                      <Calendar28 title="Från" displayDate={new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)}/>
+                      <Calendar28 title="Från" displayDate={fromDate}/>
                     </div>
-                    <div className = "px-2 py-1.5">
-                      <Calendar28 title="Till" displayDate={new Date()}/>
+                    <div className = "px-2 py-1.5 z-10">
+                      <Calendar28 title="Till" displayDate={toDate}/>
                     </div>
                     <DropdownMenuItem><Button>Välj</Button></DropdownMenuItem>
 

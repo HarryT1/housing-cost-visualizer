@@ -56,7 +56,7 @@ export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProp
               <SidebarMenuItem>
                 <DropdownMenu >
                   <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton onClick={()=> console.log("cringe")}>
+                    <SidebarMenuButton>
                       <SlidersHorizontal />
                       <span>Tidsperiod</span>
                     </SidebarMenuButton>
@@ -64,12 +64,12 @@ export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProp
                   <DropdownMenuContent side="right">
                     <div className = "px-2 py-1.5 z-10">
                       {/* Get the date from 90 days ago */}
-                      <Calendar28 title="Från" displayDate={fromDate}/>
+                      <Calendar28 title="Från" date={fromDate} setDate={setFromDate}/>
                     </div>
                     <div className = "px-2 py-1.5 z-10">
-                      <Calendar28 title="Till" displayDate={toDate}/>
+                      <Calendar28 title="Till" date={toDate} setDate={setToDate}/>
                     </div>
-                    <DropdownMenuItem><Button>Välj</Button></DropdownMenuItem>
+                    <DropdownMenuItem><Button className="w-full">Välj</Button></DropdownMenuItem>
 
 
                   </DropdownMenuContent>

@@ -34,15 +34,14 @@ function isValidDate(date: Date | undefined) {
 
 type Calendar28Props = {
   title: string;
-  displayDate?: Date;
+  date: Date | undefined;
+  setDate: React.Dispatch<React.SetStateAction<Date | undefined>>
   // add any other props you want
 };
 
-export function Calendar28({title, displayDate} :Calendar28Props) {
+export function Calendar28({title, date, setDate} :Calendar28Props) {
   const [open, setOpen] = React.useState(false)
-  const [date, setDate] = React.useState<Date | undefined>(
-    displayDate
-  )
+  
   const [month, setMonth] = React.useState<Date | undefined>(date)
   const [value, setValue] = React.useState(formatDate(date))
 
@@ -100,6 +99,7 @@ export function Calendar28({title, displayDate} :Calendar28Props) {
                 setValue(formatDate(date))
                 setOpen(false)
               }}
+              startMonth={new Date(2000, 0)}
             />
           </PopoverContent>
         </Popover>

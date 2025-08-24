@@ -104,7 +104,7 @@ export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProp
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton>
-                  <Slider defaultValue={[cellSize*10]} max={50} min={1} step={1} onValueChange={val => setTempCellSize(val[0]/10)} onValueCommit={() => setCellSize(tempCellSize)}/>
+                  <Slider defaultValue={[cellSize*10]} max={20} min={1} step={1} onValueChange={val => setTempCellSize(val[0]/10)} onValueCommit={() => setCellSize(tempCellSize)}/>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 

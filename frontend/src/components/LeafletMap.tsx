@@ -2,6 +2,7 @@ import { useEffect, useRef, React } from "react";
 import L, { Control } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import * as turf from "@turf/turf";
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface LeafletMapProps {
   showGrid: boolean; // true = show grid, false = show municipalities
@@ -10,6 +11,7 @@ interface LeafletMapProps {
 }
 
 const LeafletMap = ({ showGrid, className, cellSize}: LeafletMapProps) => {
+  const isMobile = useIsMobile();
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.GeoJSON | null>(null);
@@ -60,18 +62,21 @@ const LeafletMap = ({ showGrid, className, cellSize}: LeafletMapProps) => {
     };
     info.update = function (props) {
       if (!this._div) return;
+
+      const noInfoMessage = isMobile ? "Klicka på en ruta för mer info" : "Håll musen över en ruta för mer info"
+      
       if (showGrid) {
-        this._div.innerHTML = '<h4>Genomsnittligt kvadratmeterpris</h4>' + (props ?
+        this._div.innerHTML = (props ? '<h4>Genomsnittligt kvadratmeterpris</h4>' +
           `${Math.round(props.averagePricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup> <br><br>
         <h4>Antal bostäder</h4> ${props.count} sålda bostäder <br><br>
         <h4>Högsta kvadratmeterpris i området</h4> ${Math.round(props.maxPricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup> <br><br>
         <h4>Lägsta kvadratmeterpris i området</h4> ${Math.round(props.minPricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup>`
-          : `Håll musen över en ruta för mer info`);
+          : noInfoMessage);
       } else {
         this._div.innerHTML = '<h4>Genomsnittligt kvadratmeterpris</h4>' + (props ?
           `${Math.round(props.averagePricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup> <br><br>` +
           '<h4>Kommun</h4>' + props.kom_name
-          : `Håll musen över en kommun för mer info`);
+          : noInfoMessage);
       }
     };
     return info;

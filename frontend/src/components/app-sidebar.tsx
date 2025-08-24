@@ -34,7 +34,7 @@ import { Calendar28 } from "@/components/date-picker";
 import { Button } from "./ui/button";
 import { filterProperties } from "@turf/turf"
 
-interface AppSidebarProps {
+type AppSidebarProps = {
   setShowGrid: React.Dispatch<React.SetStateAction<boolean>>;
   setCellSize: React.Dispatch<React.SetStateAction<number>>;
   cellSize: number;

@@ -10,18 +10,13 @@ const App = () => {
   const [cellSize, setCellSize] = useState(0.5)
   return (
     <SidebarProvider>
-      <div
-        className="pointer-events-auto z-10"
-      >
-        <AppSidebar
-          setShowGrid={setShowGrid}
-          setCellSize={setCellSize}
-          cellSize={cellSize}
-        />
-      </div>
-      <div className="z-10">
-        <SidebarTrigger />
-      </div>
+
+      <AppSidebar
+        setShowGrid={setShowGrid}
+        setCellSize={setCellSize}
+        cellSize={cellSize}
+      />
+      <SidebarTrigger className="z-10 bg-white" />
       <LeafletMap className="absolute inset-0 z-0" showGrid={showGrid} cellSize={cellSize} />
     </SidebarProvider>
   );

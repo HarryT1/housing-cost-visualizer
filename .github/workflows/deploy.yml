@@ -26,7 +26,7 @@ jobs:
 
       - name: Deploy on server
         run: |
-          ssh -i ~/.ssh/id_ed25519 -p ${{secrets.PORT}} ${{secrets.USERNAME}}@{{secrets.HOST}} << 'EOF'
+          ssh -i ~/.ssh/id_ed25519 -p ${{secrets.PORT}} ${{secrets.USERNAME}}@${{secrets.HOST}} << 'EOF'
             cd housing-cost-visualizer
             git pull origin main
             docker compose down

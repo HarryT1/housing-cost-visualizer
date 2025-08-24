@@ -2,7 +2,6 @@ import { useEffect, useRef, React } from "react";
 import L, { Control } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import * as turf from "@turf/turf";
-import { useIsMobile } from "@/hooks/use-mobile"
 
 interface LeafletMapProps {
   showGrid: boolean; // true = show grid, false = show municipalities
@@ -11,7 +10,6 @@ interface LeafletMapProps {
 }
 
 const LeafletMap = ({ showGrid, className, cellSize}: LeafletMapProps) => {
-  const isMobile = useIsMobile();
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.GeoJSON | null>(null);
@@ -43,15 +41,6 @@ const LeafletMap = ({ showGrid, className, cellSize}: LeafletMapProps) => {
     };
   }
 
-
-  const info = new Control({}) as L.Control & { _div?: HTMLDivElement; update: (props?: any) => void };
-
-  info.onAdd = function () {
-    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
-    this.update();
-    return this._div;
-  };
-
   // Method for updating info control in top right corner to include more information about sold properties
   const initInfoControl = () => {
     const info = new Control({}) as L.Control & { _div?: HTMLDivElement; update: (props?: any) => void };
@@ -62,7 +51,7 @@ const LeafletMap = ({ showGrid, className, cellSize}: LeafletMapProps) => {
     };
     info.update = function (props) {
       if (!this._div) return;
-
+      const isMobile = window.innerWidth < 768;
       const noInfoMessage = isMobile ? "Klicka på en ruta för mer info" : "Håll musen över en ruta för mer info"
       
       if (showGrid) {

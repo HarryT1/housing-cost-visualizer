@@ -38,6 +38,7 @@ type AppSidebarProps = {
   setShowGrid: React.Dispatch<React.SetStateAction<boolean>>;
   setCellSize: React.Dispatch<React.SetStateAction<number>>;
   cellSize: number;
+
 }
 
 export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProps) {
@@ -46,7 +47,7 @@ export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProp
   const [tempCellSize, setTempCellSize] = useState<number>(cellSize);
   return (
     <Sidebar>
-      <SidebarHeader>Välj inställningar</SidebarHeader>
+      <SidebarHeader>Inställningar</SidebarHeader>
       <SidebarContent>
         
         <SidebarGroup>
@@ -92,7 +93,7 @@ export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProp
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="right">
-                    <DropdownMenuLabel>Choose filter settings</DropdownMenuLabel>
+                    <DropdownMenuLabel>Filterinställningar</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>Test</DropdownMenuItem>
                   </DropdownMenuContent>

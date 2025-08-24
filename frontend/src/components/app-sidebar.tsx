@@ -33,6 +33,7 @@ import React, { useState } from "react";
 import { Calendar28 } from "@/components/date-picker";
 import { Button } from "./ui/button";
 import { filterProperties } from "@turf/turf"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 type AppSidebarProps = {
   setShowGrid: React.Dispatch<React.SetStateAction<boolean>>;
@@ -42,8 +43,9 @@ type AppSidebarProps = {
 }
 
 export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProps) {
+  const isMobile = useIsMobile();
   const [toDate, setToDate] = useState<Date | undefined>(new Date())
-  const [fromDate, setFromDate] = useState<Date | undefined>(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000))
+  const [fromDate, setFromDate] = useState<Date | undefined>(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)) // Get the date from 90 days ago
   const [tempCellSize, setTempCellSize] = useState<number>(cellSize);
   return (
     <Sidebar>
@@ -62,9 +64,8 @@ export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProp
                       <span>Tidsperiod</span>
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent side="right">
+                  <DropdownMenuContent side={isMobile ? "bottom" : "right"}>
                     <div className = "px-2 py-1.5 z-10">
-                      {/* Get the date from 90 days ago */}
                       <Calendar28 title="Från" date={fromDate} setDate={setFromDate}/>
                     </div>
                     <div className = "px-2 py-1.5 z-10">
@@ -92,7 +93,7 @@ export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProp
                       <span>Filter</span>
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent side="right">
+                  <DropdownMenuContent side={isMobile ? "bottom" : "right"}>
                     <DropdownMenuLabel>Filterinställningar</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>Test</DropdownMenuItem>

@@ -2,8 +2,8 @@ services:
   backend:
     image: mcr.microsoft.com/dotnet/sdk:9.0
     volumes:
-      - ./backend:/src       # Mount source for live reload
-    working_dir: /src
+      - ./backend:/backend      # Mount source for live reload
+    working_dir: /backend
     command: dotnet watch run --urls=http://0.0.0.0:5000
     restart: always
     depends_on:

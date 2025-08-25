@@ -62,7 +62,7 @@ const LeafletMap = ({ showGrid, className, cellSize}: LeafletMapProps) => {
         <h4>Lägsta kvadratmeterpris i området</h4> ${Math.round(props.minPricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup>`
           : noInfoMessage);
       } else {
-        this._div.innerHTML = '<h4>Genomsnittligt kvadratmeterpris</h4>' + (props ?
+        this._div.innerHTML = (props ? '<h4>Genomsnittligt kvadratmeterpris</h4>' +
           `${Math.round(props.averagePricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup> <br><br>` +
           '<h4>Kommun</h4>' + props.kom_name
           : noInfoMessage);

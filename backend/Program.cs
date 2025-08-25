@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using backend.Models;
-using backend.Services;
 using Microsoft.AspNetCore.HttpOverrides;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -43,7 +42,6 @@ var connectionString = $"Host={host};Port={port};Database={db};Username={user};P
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString)
            .UseSnakeCaseNamingConvention());
-builder.Services.AddScoped<PropertyListingService>();
 
 var app = builder.Build();
 

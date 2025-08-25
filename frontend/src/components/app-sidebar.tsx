@@ -37,12 +37,13 @@ import { useIsMobile } from "@/hooks/use-mobile"
 
 type AppSidebarProps = {
   setShowGrid: React.Dispatch<React.SetStateAction<boolean>>;
+  showGrid: boolean;
   setCellSize: React.Dispatch<React.SetStateAction<number>>;
   cellSize: number;
 
 }
 
-export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProps) {
+export function AppSidebar({ setShowGrid, showGrid, setCellSize, cellSize }: AppSidebarProps) {
   const isMobile = useIsMobile();
   const [toDate, setToDate] = useState<Date | undefined>(new Date())
   const [fromDate, setFromDate] = useState<Date | undefined>(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)) // Get the date from 90 days ago
@@ -51,7 +52,7 @@ export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProp
     <Sidebar>
       <SidebarHeader>Inställningar</SidebarHeader>
       <SidebarContent>
-        
+
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -65,11 +66,11 @@ export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProp
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side={isMobile ? "bottom" : "right"}>
-                    <div className = "px-2 py-1.5 z-10">
-                      <Calendar28 title="Från" date={fromDate} setDate={setFromDate}/>
+                    <div className="px-2 py-1.5 z-10">
+                      <Calendar28 title="Från" date={fromDate} setDate={setFromDate} />
                     </div>
-                    <div className = "px-2 py-1.5 z-10">
-                      <Calendar28 title="Till" date={toDate} setDate={setToDate}/>
+                    <div className="px-2 py-1.5 z-10">
+                      <Calendar28 title="Till" date={toDate} setDate={setToDate} />
                     </div>
                     <DropdownMenuItem><Button className="w-full">Välj</Button></DropdownMenuItem>
 
@@ -81,7 +82,7 @@ export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProp
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => setShowGrid(prev => !prev)}>
                   <MapPinned />
-                  <span>Geografisk uppdelning</span>
+                  <span>{showGrid ? "Ändra till kommunvy" : "Ändra till rutnätsvy"}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
@@ -100,15 +101,13 @@ export function AppSidebar({setShowGrid, setCellSize, cellSize} : AppSidebarProp
                   </DropdownMenuContent>
                 </DropdownMenu>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                Rutstorlek: {tempCellSize} x {tempCellSize} km<sup>2</sup>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Slider defaultValue={[cellSize*10]} max={20} min={1} step={1} onValueChange={val => setTempCellSize(val[0]/10)} onValueCommit={() => setCellSize(tempCellSize)}/>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
+              {showGrid && (
+                <SidebarMenuItem>
+                  Rutstorlek: {tempCellSize} x {tempCellSize} km<sup>2</sup>
+                  <SidebarMenuButton>
+                    <Slider defaultValue={[cellSize * 10]} max={20} min={1} step={1} onValueChange={val => setTempCellSize(val[0] / 10)} onValueCommit={() => setCellSize(tempCellSize)} />
+                  </SidebarMenuButton>
+                </SidebarMenuItem>)}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

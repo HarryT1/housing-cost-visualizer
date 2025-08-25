@@ -13,6 +13,7 @@ const App = () => {
 
       <AppSidebar
         setShowGrid={setShowGrid}
+        showGrid = {showGrid}
         setCellSize={setCellSize}
         cellSize={cellSize}
       />

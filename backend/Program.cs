@@ -42,6 +42,7 @@ var connectionString = $"Host={host};Port={port};Database={db};Username={user};P
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString)
            .UseSnakeCaseNamingConvention());
+builder.Services.AddScoped<PropertyListingService>();
 
 var app = builder.Build();
 

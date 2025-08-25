@@ -52,7 +52,7 @@ const LeafletMap = ({ showGrid, className, cellSize}: LeafletMapProps) => {
     info.update = function (props) {
       if (!this._div) return;
       const isMobile = window.innerWidth < 768;
-      const noInfoMessage = isMobile ? "Klicka på en ruta för mer info" : "Håll musen över en ruta för mer info"
+      const noInfoMessage = isMobile ? "Klicka på ett område för mer info" : "Håll musen över ett område för mer info"
       
       if (showGrid) {
         this._div.innerHTML = (props ? '<h4>Genomsnittligt kvadratmeterpris</h4>' +

@@ -34,10 +34,9 @@ jobs:
             cd housing-cost-visualizer
             git pull origin main
 
-            docker pull ghcr.io/$REPOSITORY_LC/frontend:latest
-            docker pull ghcr.io/$REPOSITORY_LC/backend:latest
-
             docker compose down
+
+            docker compose -f compose.yaml pull frontend backend
 
             docker compose -f compose.yaml up -d
           EOF

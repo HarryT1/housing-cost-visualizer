@@ -82,7 +82,7 @@ export function AppSidebar({ setShowGrid, showGrid, setCellSize, cellSize }: App
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => setShowGrid(prev => !prev)}>
                   <MapPinned />
-                  <span>{showGrid ? "Ändra till kommunvy" : "Ändra till rutnätsvy"}</span>
+                  <span>{showGrid ? "Ändra till kommunvyn" : "Ändra till rutnätsvyn"}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
 

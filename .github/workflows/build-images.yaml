@@ -40,7 +40,7 @@ jobs:
 
       - name: Push frontend and backend images
         run: |
-            docker push ghcr.io/$FRONTEND:${{ github.sha }}
-            docker push ghcr.io/$FRONTEND:latest
-            docker push ghcr.io/$BACKEND:${{ github.sha }}
-            docker push ghcr.io/$BACKEND:latest
+            docker push $FRONTEND:${{ github.sha }}
+            docker push $FRONTEND:latest
+            docker push $BACKEND:${{ github.sha }}
+            docker push $BACKEND:latest

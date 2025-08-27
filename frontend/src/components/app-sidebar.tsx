@@ -86,21 +86,6 @@ export function AppSidebar({ setShowGrid, showGrid, setCellSize, cellSize }: App
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
-              <SidebarMenuItem>
-                <DropdownMenu >
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton>
-                      <SlidersHorizontal />
-                      <span>Filter</span>
-                    </SidebarMenuButton>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side={isMobile ? "bottom" : "right"}>
-                    <DropdownMenuLabel>Filterinställningar</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>Test</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuItem>
               {showGrid && (
                 <SidebarMenuItem>
                   Rutstorlek: {tempCellSize} x {tempCellSize} km<sup>2</sup>

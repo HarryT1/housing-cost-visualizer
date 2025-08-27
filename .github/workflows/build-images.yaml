@@ -11,12 +11,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FRONTEND: ghcr.io/${{ github.repository.toLowerCase() }}/frontend
-      BACKEND: ghcr.io/${{ github.repository.toLowerCase() }}/backend
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
+
+      - name: Set lowercase repository for GHCR
+        run: echo "REPOSITORY_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
+      - name: Set image names
+        run: |
+          echo "FRONTEND=ghcr.io/$REPOSITORY_LC/frontend" >> $GITHUB_ENV
+          echo "BACKEND=ghcr.io/$REPOSITORY_LC/backend" >> $GITHUB_ENV
 
       - name: Log in to GHCR
         uses: docker/login-action@v3

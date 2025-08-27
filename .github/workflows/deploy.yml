@@ -23,14 +23,19 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -p ${{ secrets.PORT }} ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
+      - name: Set lowercase repository for GHCR
+        run: echo "REPOSITORY_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
       - name: Deploy on server
         run: |
           ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.PORT }} ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
             cd housing-cost-visualizer
             git pull origin main
 
-            docker pull ghcr.io/${{ github.repository.toLowerCase() }}/frontend:latest
-            docker pull ghcr.io/${{ github.repository.toLowerCase() }}/backend:latest
+            docker pull ghcr.io/$REPOSITORY_LC/frontend:latest
+            docker pull ghcr.io/$REPOSITORY_LC/backend:latest
 
             docker compose down
 

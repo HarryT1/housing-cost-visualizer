@@ -13,7 +13,7 @@ services:
       - "${DB_PORT}:5432" 
 
   backend:
-    image: ghcr.io/HarryT1/housing-cost-visualizer/backend:latest
+    image: ghcr.io/harryt1/housing-cost-visualizer/backend:latest
     restart: always
     depends_on:
       - db
@@ -31,7 +31,7 @@ services:
     
 
   frontend:
-    image: ghcr.io/HarryT1/housing-cost-visualizer/frontend:latest
+    image: ghcr.io/harryt1/housing-cost-visualizer/frontend:latest
     restart: always
     depends_on:
       - backend

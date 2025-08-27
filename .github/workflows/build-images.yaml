@@ -11,6 +11,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FRONTEND: ghcr.io/${{ github.repository.toLowerCase() }}/frontend
+      BACKEND: ghcr.io/${{ github.repository.toLowerCase() }}/backend
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -24,15 +27,13 @@ jobs:
 
       - name: Build and tag images
         run: |
-            FRONTEND=ghcr.io/${{ github.repository }}/frontend
-            BACKEND=ghcr.io/${{ github.repository }}/backend
 
             docker build -t $FRONTEND:${{ github.sha }} -t $FRONTEND:latest ./frontend
             docker build -t $BACKEND:${{ github.sha }} -t $BACKEND:latest ./backend
 
       - name: Push frontend and backend images
         run: |
-            docker push ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}
-            docker push ghcr.io/${{ github.repository }}/frontend:latest
-            docker push ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
-            docker push ghcr.io/${{ github.repository }}/backend:latest
+            docker push ghcr.io/$FRONTEND/frontend:${{ github.sha }}
+            docker push ghcr.io/$FRONTEND/frontend:latest
+            docker push ghcr.io/$BACKEND/backend:${{ github.sha }}
+            docker push ghcr.io/$BACKEND/backend:latest

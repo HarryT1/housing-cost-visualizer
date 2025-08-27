@@ -29,8 +29,8 @@ jobs:
             cd housing-cost-visualizer
             git pull origin main
 
-            docker pull ghcr.io/${{ github.repository }}/frontend:latest
-            docker pull ghcr.io/${{ github.repository }}/backend:latest
+            docker pull ghcr.io/${{ github.repository.toLowerCase() }}/frontend:latest
+            docker pull ghcr.io/${{ github.repository.toLowerCase() }}/backend:latest
 
             docker compose down
 

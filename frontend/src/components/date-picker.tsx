@@ -102,7 +102,7 @@ export function Calendar28({title, initialDate, setConfirmDate, confirmSignal} :
                 setValue(formatDate(date))
                 setOpen(false)
               }}
-              startMonth={new Date(2000, 0)}
+              startMonth={new Date(2008, 0)}
             />
           </PopoverContent>
         </Popover>

@@ -4,7 +4,7 @@ public class PropertyListing
 {
     public int Id { get; set; }
     public string PropertyType { get; set; } = "Undefined";
-    public DateTime SaleDate { get; set; }
+    public DateOnly SaleDate { get; set; }
     public string Municipality { get; set; } = "Undefined";
     public string Neighborhood { get; set; } = "Undefined";
     public string Address { get; set; } = "Undefined";

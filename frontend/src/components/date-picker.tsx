@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import {useEffect} from "react"
 import { CalendarIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -34,16 +35,18 @@ function isValidDate(date: Date | undefined) {
 
 type Calendar28Props = {
   title: string;
-  date: Date | undefined;
-  setDate: React.Dispatch<React.SetStateAction<Date | undefined>>
-  // add any other props you want
+  initialDate: Date | undefined;
+  setConfirmDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
+  confirmSignal: number;
 };
 
-export function Calendar28({title, date, setDate} :Calendar28Props) {
+export function Calendar28({title, initialDate, setConfirmDate, confirmSignal} :Calendar28Props) {
   const [open, setOpen] = React.useState(false)
-  
+  const [date, setDate] = React.useState<Date | undefined>(initialDate)
   const [month, setMonth] = React.useState<Date | undefined>(date)
   const [value, setValue] = React.useState(formatDate(date))
+
+  useEffect(() => {setConfirmDate(date)}, [confirmSignal]) 
 
   return (
     <div className="flex flex-col gap-3">

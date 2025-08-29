@@ -7,9 +7,11 @@ interface LeafletMapProps {
   showGrid: boolean; // true = show grid, false = show municipalities
   className?: string;
   cellSize: number; // Cell size of grid in km, minimum of 0.1, maximum of 5 (step size 0.1)
+  fromDate: Date | undefined;
+  toDate: Date | undefined;
 }
 
-const LeafletMap = ({ showGrid, className, cellSize}: LeafletMapProps) => {
+const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletMapProps) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.GeoJSON | null>(null);
@@ -283,12 +285,6 @@ const LeafletMap = ({ showGrid, className, cellSize}: LeafletMapProps) => {
         layerRef.current = null;
       }
 
-
-
-
-
-
-
       if (showGrid) {
         await renderGrid();
       } else {
@@ -298,7 +294,7 @@ const LeafletMap = ({ showGrid, className, cellSize}: LeafletMapProps) => {
     };
 
     fetchDataAndRender();
-  }, [showGrid, cellSize]);
+  }, [showGrid, cellSize, fromDate, toDate]);
 
   return (
     <div

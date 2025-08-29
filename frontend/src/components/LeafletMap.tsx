@@ -200,7 +200,6 @@ const LeafletMap = ({
       }),
     ]);
 
-    console.log(formatToSwedishDate(fromDate));
     const municipalityGeoData =
       (await geoRes.json()) as GeoJSON.FeatureCollection;
     const municipalityAvgSqmPrice: Record<string, number> =

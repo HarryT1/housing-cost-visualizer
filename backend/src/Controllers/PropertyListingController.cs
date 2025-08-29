@@ -23,10 +23,10 @@ public class PropertyListingController : ControllerBase
         _propertyListingService = propertyListingService;
     }
 
-    [HttpGet("AvgSqmPriceByMunicipality")]
-    public async Task<ActionResult<Dictionary<string, double>>> GetAvgSqmPriceByMunicipality()
+    [HttpPost("AvgSqmPriceByMunicipality")]
+    public async Task<ActionResult<Dictionary<string, double>>> GetAvgSqmPriceByMunicipality([FromBody] MunicipalityRequestDto municipalityRequestDto)
     {
-        var averages = await _propertyListingService.GetAvgSqmPriceByMunicipalityAsync();
+        var averages = await _propertyListingService.GetAvgSqmPriceByMunicipalityAsync(municipalityRequestDto);
         return Ok(averages);
     }
 
@@ -56,15 +56,15 @@ public class PropertyListingController : ControllerBase
     [HttpPost("GridSqmPrices")]
     // Cellscale determines the resulting grid cell sizes, the smallest possible grid cells 
     // come with cellScale = 1 with grids of 100mx100m and cellScale = 5 results in 500mx500m grid cells etc.
-    public async Task<ActionResult<List<GridCellInfo>>> GridSqmPrices([FromBody] int cellScale)
+    public async Task<ActionResult<List<GridCellInfoDto>>> GridSqmPrices([FromBody] GridRequestDto gridRequestDto)
     {
 
-        if (cellScale <= 0 || cellScale > 20)
+        if (gridRequestDto.CellScale <= 0 || gridRequestDto.CellScale > 20)
         {
             return BadRequest("cellScale must be an integer between the values 1 and 20.");
         }
 
-        var gridInfo = await _propertyListingService.GetGridCellInfoAsync(cellScale);
+        var gridInfo = await _propertyListingService.GetGridCellInfoAsync(gridRequestDto);
 
         return Ok(gridInfo);
     }

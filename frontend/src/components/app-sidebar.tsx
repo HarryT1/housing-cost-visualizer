@@ -40,14 +40,23 @@ type AppSidebarProps = {
   showGrid: boolean;
   setCellSize: React.Dispatch<React.SetStateAction<number>>;
   cellSize: number;
+  fromDate: Date | undefined;
+  setFromDate: React.Dispatch<Date | undefined>;
+  toDate: Date | undefined;
+  setToDate: React.Dispatch<Date | undefined>;
 
 }
 
-export function AppSidebar({ setShowGrid, showGrid, setCellSize, cellSize }: AppSidebarProps) {
+export function AppSidebar({ setShowGrid, showGrid, setCellSize, cellSize, fromDate, setFromDate, toDate, setToDate }: AppSidebarProps) {
   const isMobile = useIsMobile();
-  const [toDate, setToDate] = useState<Date | undefined>(new Date())
-  const [fromDate, setFromDate] = useState<Date | undefined>(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)) // Get the date from 90 days ago
   const [tempCellSize, setTempCellSize] = useState<number>(cellSize);
+
+  const [confirmSignal, setConfirmSignal] = useState(0);
+
+  const handleConfirm = () => {
+    setConfirmSignal((prev) => prev + 1);
+  };
+
   return (
     <Sidebar>
       <SidebarHeader>Inställningar</SidebarHeader>
@@ -62,17 +71,17 @@ export function AppSidebar({ setShowGrid, showGrid, setCellSize, cellSize }: App
                   <DropdownMenuTrigger asChild>
                     <SidebarMenuButton>
                       <SlidersHorizontal />
-                      <span>Tidsperiod</span>
+                      <span>Välj tidsperiod</span>
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side={isMobile ? "bottom" : "right"}>
                     <div className="px-2 py-1.5 z-10">
-                      <Calendar28 title="Från" date={fromDate} setDate={setFromDate} />
+                      <Calendar28 title="Från" initialDate={fromDate} setConfirmDate={setFromDate} confirmSignal={confirmSignal}/>
                     </div>
                     <div className="px-2 py-1.5 z-10">
-                      <Calendar28 title="Till" date={toDate} setDate={setToDate} />
+                      <Calendar28 title="Till" initialDate={toDate} setConfirmDate={setToDate} confirmSignal={confirmSignal}/>
                     </div>
-                    <DropdownMenuItem><Button className="w-full">Välj</Button></DropdownMenuItem>
+                    <DropdownMenuItem><Button className="w-full" onClick={() => handleConfirm()}>Välj</Button></DropdownMenuItem>
 
 
                   </DropdownMenuContent>

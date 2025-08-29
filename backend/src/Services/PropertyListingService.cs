@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using backend.Models;
 using backend.DTOs;
+using System.Threading.Tasks.Dataflow;
 
 
 namespace backend.Services
@@ -64,12 +65,13 @@ namespace backend.Services
             .FirstOrDefaultAsync();
         }
 
-        public async Task<List<GridCellInfo>> GetGridCellInfoAsync(int cellScale)
+        public async Task<List<GridCellInfoDto>> GetGridCellInfoAsync(GridRequestDto gridRequestDto)
         {
             return await _context.Properties
-                .Where(p => p.Price.HasValue && p.AreaSqm.HasValue && p.AreaSqm.Value > 0 && (p.SaleType == "Slutpris" || p.SaleType == "Lagfart"))
-                .GroupBy(p => new { NewGridX = p.GridX / cellScale, NewGridY = p.GridY / cellScale })
-                .Select(g => new GridCellInfo
+                .Where(p => p.Price.HasValue && p.AreaSqm.HasValue && p.AreaSqm.Value > 0
+                && (p.SaleType == "Slutpris" || p.SaleType == "Lagfart") && p.SaleDate > gridRequestDto.FromDate && p.SaleDate < gridRequestDto.ToDate)
+                .GroupBy(p => new { NewGridX = p.GridX / gridRequestDto.CellScale, NewGridY = p.GridY / gridRequestDto.CellScale })
+                .Select(g => new GridCellInfoDto
                 {
                     NewGridX = g.Key.NewGridX,
                     NewGridY = g.Key.NewGridY,

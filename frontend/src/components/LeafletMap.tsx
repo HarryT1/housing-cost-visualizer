@@ -192,15 +192,21 @@ const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletM
     const latStep = 0.008983 * cellSize;
     const lngStep = 0.01751 * cellSize;
     const gridCells: GeoJSON.Feature<GeoJSON.Polygon>[] = [];
+    const temp = JSON.stringify({
+        cellScale: cellSize * 10,
+        fromDate: fromDate,
+        toDate: toDate,
+      }
+      )
     const averageSqmPricePerGrid = await fetch(`api/PropertyListing/GridSqmPrices`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(
-        cellSize * 10
-      ),
+      body: temp,
     });
+
+    console.log(temp)
 
     interface GridCellData {
       newGridX: number;

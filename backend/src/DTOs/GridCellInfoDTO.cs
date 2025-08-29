@@ -1,6 +1,6 @@
 namespace backend.DTOs
 {
-    public class GridCellInfo
+    public class GridCellInfoDto
     {
         public int NewGridX { get; set; }
         public int NewGridY { get; set; }

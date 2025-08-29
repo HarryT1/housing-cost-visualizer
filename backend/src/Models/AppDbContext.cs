@@ -9,7 +9,7 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<PropertyListing>()
-            .ToTable("apartment_sales"); // match the table name in the database
+            .ToTable("apartment_sales");
     }
     public DbSet<PropertyListing> Properties { get; set; }
 }

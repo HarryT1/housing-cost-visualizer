@@ -11,26 +11,43 @@ interface LeafletMapProps {
   toDate: Date | undefined;
 }
 
-const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletMapProps) => {
+const LeafletMap = ({
+  showGrid,
+  className,
+  cellSize,
+  fromDate,
+  toDate,
+}: LeafletMapProps) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.GeoJSON | null>(null);
-  const infoRef = useRef<L.Control & { _div?: HTMLDivElement; update: (props?: any) => void } | null>(null);
-
-
+  const infoRef = useRef<
+    | (L.Control & { _div?: HTMLDivElement; update: (props?: any) => void })
+    | null
+  >(null);
 
   function getColor(d: number) {
-    return d > 120000 ? "#08306b" :  // darkest blue, above 120k
-      d > 110000 ? "#084594" :
-        d > 100000 ? "#0868ac" :
-          d > 90000 ? "#2b8cbe" :
-            d > 80000 ? "#4ba3d9" :
-              d > 70000 ? "#69b3e7" :
-                d > 60000 ? "#8cc6f2" :
-                  d > 50000 ? "#add8ff" :
-                    d > 40000 ? "#cde9ff" :
-                      d > 30000 ? "#e7f3ff" :
-                        "#f0f8ff"; // Lightest blue, below 30k
+    return d > 120000
+      ? "#08306b" // darkest blue, above 120k
+      : d > 110000
+      ? "#084594"
+      : d > 100000
+      ? "#0868ac"
+      : d > 90000
+      ? "#2b8cbe"
+      : d > 80000
+      ? "#4ba3d9"
+      : d > 70000
+      ? "#69b3e7"
+      : d > 60000
+      ? "#8cc6f2"
+      : d > 50000
+      ? "#add8ff"
+      : d > 40000
+      ? "#cde9ff"
+      : d > 30000
+      ? "#e7f3ff"
+      : "#f0f8ff"; // Lightest blue, below 30k
   }
 
   function style(feature: any) {
@@ -45,51 +62,69 @@ const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletM
 
   // Method for updating info control in top right corner to include more information about sold properties
   const initInfoControl = () => {
-    const info = new Control({}) as L.Control & { _div?: HTMLDivElement; update: (props?: any) => void };
+    const info = new Control({}) as L.Control & {
+      _div?: HTMLDivElement;
+      update: (props?: any) => void;
+    };
     info.onAdd = function () {
-      this._div = L.DomUtil.create('div', 'info');
+      this._div = L.DomUtil.create("div", "info");
       this.update();
       return this._div;
     };
     info.update = function (props) {
       if (!this._div) return;
       const isMobile = window.innerWidth < 768;
-      const noInfoMessage = isMobile ? "Klicka på ett område för mer info" : "Håll musen över ett område för mer info"
-      
+      const noInfoMessage = isMobile
+        ? "Klicka på ett område för mer info"
+        : "Håll musen över ett område för mer info";
+
       if (showGrid) {
-        this._div.innerHTML = (props ? '<h4>Genomsnittligt kvadratmeterpris</h4>' +
-          `${Math.round(props.averagePricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup> <br><br>
+        this._div.innerHTML = props
+          ? "<h4>Genomsnittligt kvadratmeterpris</h4>" +
+            `${Math.round(props.averagePricePerSqm).toLocaleString(
+              "sv-SE"
+            )} kr/m<sup>2</sup> <br><br>
         <h4>Antal bostäder</h4> ${props.count} sålda bostäder <br><br>
-        <h4>Högsta kvadratmeterpris i området</h4> ${Math.round(props.maxPricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup> <br><br>
-        <h4>Lägsta kvadratmeterpris i området</h4> ${Math.round(props.minPricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup>`
-          : noInfoMessage);
+        <h4>Högsta kvadratmeterpris i området</h4> ${Math.round(
+          props.maxPricePerSqm
+        ).toLocaleString("sv-SE")} kr/m<sup>2</sup> <br><br>
+        <h4>Lägsta kvadratmeterpris i området</h4> ${Math.round(
+          props.minPricePerSqm
+        ).toLocaleString("sv-SE")} kr/m<sup>2</sup>`
+          : noInfoMessage;
       } else {
-        this._div.innerHTML = (props ? '<h4>Genomsnittligt kvadratmeterpris</h4>' +
-          `${Math.round(props.averagePricePerSqm).toLocaleString("sv-SE")} kr/m<sup>2</sup> <br><br>` +
-          '<h4>Kommun</h4>' + props.kom_name
-          : noInfoMessage);
+        this._div.innerHTML = props
+          ? "<h4>Genomsnittligt kvadratmeterpris</h4>" +
+            `${Math.round(props.averagePricePerSqm).toLocaleString(
+              "sv-SE"
+            )} kr/m<sup>2</sup> <br><br>` +
+            "<h4>Kommun</h4>" +
+            props.kom_name
+          : noInfoMessage;
       }
     };
     return info;
   };
 
   const initLegend = () => {
-    const legend = new Control({ position: 'bottomright' });
+    const legend = new Control({ position: "bottomright" });
     legend.onAdd = function () {
-      const div = L.DomUtil.create('div', 'info legend');
-      const grades = [0, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 110000, 120000];
+      const div = L.DomUtil.create("div", "info legend");
+      const grades = [
+        0, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 110000,
+        120000,
+      ];
       for (let i = 0; i < grades.length; i++) {
         const from = grades[i].toLocaleString("sv-SE");
         const to = grades[i + 1] ? grades[i + 1].toLocaleString("sv-SE") : null;
-        div.innerHTML +=
-          `<i style="background:${getColor(grades[i] + 1)}"></i> ${from}${to ? `&ndash;${to}<br>` : '+'}`;
+        div.innerHTML += `<i style="background:${getColor(
+          grades[i] + 1
+        )}"></i> ${from}${to ? `&ndash;${to}<br>` : "+"}`;
       }
       return div;
     };
     return legend;
   };
-
-
 
   const initMap = () => {
     if (mapRef.current && !mapInstanceRef.current) {
@@ -107,34 +142,28 @@ const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletM
       legend.addTo(mapInstanceRef.current);
       infoRef.current = initInfoControl();
       infoRef.current.addTo(mapInstanceRef.current);
-
     }
   };
-
-
 
   function highlightFeature(e: L.LeafletMouseEvent) {
     var layer = e.target;
 
     layer.setStyle({
       weight: 3,
-      color: '#FFF',
-      dashArray: '',
-      fillOpacity: 0.7
+      color: "#FFF",
+      dashArray: "",
+      fillOpacity: 0.7,
     });
 
     layer.bringToFront();
     infoRef.current?.update(layer.feature.properties);
-
   }
 
   function resetHighlight(e: L.LeafletMouseEvent) {
-    if (layerRef.current)
-      layerRef.current.resetStyle(e.target);
+    if (layerRef.current) layerRef.current.resetStyle(e.target);
 
     infoRef.current?.update();
   }
-
 
   function onEachFeature(feature: GeoJSON.Feature, layer: L.Layer) {
     layer.on({
@@ -143,17 +172,23 @@ const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletM
     });
   }
 
-
-
-
   const renderMunicipalities = async () => {
+    const temp = JSON.stringify({ fromDate: fromDate, toDate: toDate });
     const [geoRes, dataRes] = await Promise.all([
       fetch("./data/stockholm_municipalities.geojson"),
-      fetch(`api/PropertyListing/AvgSqmPriceByMunicipality`),
+      fetch(`api/PropertyListing/AvgSqmPriceByMunicipality`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: temp,
+      }),
     ]);
-    const municipalityGeoData = (await geoRes.json()) as GeoJSON.FeatureCollection;
-    const municipalityAvgSqmPrice: Record<string, number> = await dataRes.json();
-
+    console.log(temp)
+    const municipalityGeoData =
+      (await geoRes.json()) as GeoJSON.FeatureCollection;
+    const municipalityAvgSqmPrice: Record<string, number> =
+      await dataRes.json();
 
     const modifiedGeoJson = {
       ...municipalityGeoData,
@@ -175,7 +210,10 @@ const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletM
       if (layerRef.current) {
         mapInstanceRef.current.removeLayer(layerRef.current);
       }
-      layerRef.current = L.geoJSON(modifiedGeoJson, { style, onEachFeature: onEachFeature }).addTo(mapInstanceRef.current);
+      layerRef.current = L.geoJSON(modifiedGeoJson, {
+        style,
+        onEachFeature: onEachFeature,
+      }).addTo(mapInstanceRef.current);
     }
   };
 
@@ -183,7 +221,7 @@ const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletM
     // Get geographical data about stockholms län
     const [geoRes, bboxRes] = await Promise.all([
       fetch(`api/PropertyListing/Polygon`),
-      fetch(`api/PropertyListing/BoundingBox`)
+      fetch(`api/PropertyListing/BoundingBox`),
     ]);
     const geojson = await geoRes.json();
     //const { minLng, minLat, maxLng, maxLat } = await bboxRes.json();
@@ -192,21 +230,20 @@ const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletM
     const latStep = 0.008983 * cellSize;
     const lngStep = 0.01751 * cellSize;
     const gridCells: GeoJSON.Feature<GeoJSON.Polygon>[] = [];
-    const temp = JSON.stringify({
-        cellScale: cellSize * 10,
-        fromDate: fromDate,
-        toDate: toDate,
+    const averageSqmPricePerGrid = await fetch(
+      `api/PropertyListing/GridSqmPrices`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cellScale: cellSize * 10,
+          fromDate: fromDate,
+          toDate: toDate,
+        }),
       }
-      )
-    const averageSqmPricePerGrid = await fetch(`api/PropertyListing/GridSqmPrices`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: temp,
-    });
-
-    console.log(temp)
+    );
 
     interface GridCellData {
       newGridX: number;
@@ -216,7 +253,7 @@ const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletM
       minPricePerSqm: number;
       maxPricePerSqm: number;
     }
-    const gridData: GridCellData[] = await averageSqmPricePerGrid.json()
+    const gridData: GridCellData[] = await averageSqmPricePerGrid.json();
 
     for (const cell of gridData) {
       const minLng = cell.newGridX * lngStep;
@@ -242,7 +279,7 @@ const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletM
           averagePricePerSqm: cell.averagePricePerSqm,
           maxPricePerSqm: cell.maxPricePerSqm,
           minPricePerSqm: cell.minPricePerSqm,
-          count: cell.count
+          count: cell.count,
         },
       };
 
@@ -250,7 +287,6 @@ const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletM
         gridCells.push(cellPolygon);
       }
     }
-
 
     const gridFeatureCollection: GeoJSON.FeatureCollection<GeoJSON.Polygon> = {
       type: "FeatureCollection",
@@ -261,8 +297,10 @@ const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletM
       if (layerRef.current) {
         mapInstanceRef.current.removeLayer(layerRef.current);
       }
-      layerRef.current = L.geoJSON(gridFeatureCollection, { style, onEachFeature: onEachFeature })
-        .addTo(mapInstanceRef.current);
+      layerRef.current = L.geoJSON(gridFeatureCollection, {
+        style,
+        onEachFeature: onEachFeature,
+      }).addTo(mapInstanceRef.current);
     }
   };
 
@@ -285,7 +323,7 @@ const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletM
           layer.off({
             mouseover: highlightFeature,
             mouseout: resetHighlight,
-          })
+          });
         });
         mapInstanceRef.current.removeLayer(layerRef.current);
         layerRef.current = null;
@@ -296,7 +334,6 @@ const LeafletMap = ({ showGrid, className, cellSize, fromDate, toDate}: LeafletM
       } else {
         await renderMunicipalities();
       }
-
     };
 
     fetchDataAndRender();

@@ -23,10 +23,10 @@ public class PropertyListingController : ControllerBase
         _propertyListingService = propertyListingService;
     }
 
-    [HttpGet("AvgSqmPriceByMunicipality")]
-    public async Task<ActionResult<Dictionary<string, double>>> GetAvgSqmPriceByMunicipality()
+    [HttpPost("AvgSqmPriceByMunicipality")]
+    public async Task<ActionResult<Dictionary<string, double>>> GetAvgSqmPriceByMunicipality([FromBody] MunicipalityRequestDto municipalityRequestDto)
     {
-        var averages = await _propertyListingService.GetAvgSqmPriceByMunicipalityAsync();
+        var averages = await _propertyListingService.GetAvgSqmPriceByMunicipalityAsync(municipalityRequestDto);
         return Ok(averages);
     }
 

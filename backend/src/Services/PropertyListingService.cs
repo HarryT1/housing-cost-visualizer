@@ -17,10 +17,11 @@ namespace backend.Services
         }
 
 
-        public async Task<Dictionary<string, double>> GetAvgSqmPriceByMunicipalityAsync()
+        public async Task<Dictionary<string, double>> GetAvgSqmPriceByMunicipalityAsync(MunicipalityRequestDto municipalityRequestDto)
         {
             return await _context.Properties
-            .Where(p => p.Price.HasValue && p.AreaSqm.HasValue && p.AreaSqm.Value > 0 && p.SaleType == "Slutpris")
+            .Where(p => p.Price.HasValue && p.AreaSqm.HasValue && p.AreaSqm.Value > 0 && p.SaleType == "Slutpris"
+            && p.SaleDate > municipalityRequestDto.FromDate && p.SaleDate < municipalityRequestDto.ToDate)
             .GroupBy(p => p.Municipality)
             .Select(g => new
             {

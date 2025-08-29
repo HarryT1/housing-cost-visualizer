@@ -22,7 +22,7 @@ const App = () => {
         toDate={toDate}
         setToDate={setToDate}
       />
-      <SidebarTrigger className="z-10 bg-white" />
+      <SidebarTrigger className="z-10 bg-white rounded-tl-none rounded-bl-none" />
       <LeafletMap className="absolute inset-0 z-0" showGrid={showGrid} cellSize={cellSize} fromDate={fromDate} toDate={toDate} />
     </SidebarProvider>
   );

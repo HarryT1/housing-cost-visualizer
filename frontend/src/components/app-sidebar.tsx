@@ -71,7 +71,7 @@ export function AppSidebar({ setShowGrid, showGrid, setCellSize, cellSize, fromD
                   <DropdownMenuTrigger asChild>
                     <SidebarMenuButton>
                       <SlidersHorizontal />
-                      <span>Tidsperiod</span>
+                      <span>Välj tidsperiod</span>
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side={isMobile ? "bottom" : "right"}>

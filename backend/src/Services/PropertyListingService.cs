@@ -21,7 +21,7 @@ namespace backend.Services
         {
             return await _context.Properties
             .Where(p => p.Price.HasValue && p.AreaSqm.HasValue && p.AreaSqm.Value > 0 && p.SaleType == "Slutpris"
-            && p.SaleDate > municipalityRequestDto.FromDate && p.SaleDate < municipalityRequestDto.ToDate)
+            && p.SaleDate >= municipalityRequestDto.FromDate && p.SaleDate <= municipalityRequestDto.ToDate)
             .GroupBy(p => p.Municipality)
             .Select(g => new
             {
@@ -70,7 +70,7 @@ namespace backend.Services
         {
             return await _context.Properties
                 .Where(p => p.Price.HasValue && p.AreaSqm.HasValue && p.AreaSqm.Value > 0
-                && (p.SaleType == "Slutpris" || p.SaleType == "Lagfart") && p.SaleDate > gridRequestDto.FromDate && p.SaleDate < gridRequestDto.ToDate)
+                && (p.SaleType == "Slutpris" || p.SaleType == "Lagfart") && p.SaleDate >= gridRequestDto.FromDate && p.SaleDate <= gridRequestDto.ToDate)
                 .GroupBy(p => new { NewGridX = p.GridX / gridRequestDto.CellScale, NewGridY = p.GridY / gridRequestDto.CellScale })
                 .Select(g => new GridCellInfoDto
                 {

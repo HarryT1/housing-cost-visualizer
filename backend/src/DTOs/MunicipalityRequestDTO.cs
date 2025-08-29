@@ -2,7 +2,7 @@ namespace backend.DTOs
 {
     public class MunicipalityRequestDto
     {
-        public DateTime FromDate { get; set; }
-        public DateTime ToDate { get; set; }
+        public DateOnly FromDate { get; set; }
+        public DateOnly ToDate { get; set; }
     }
 }

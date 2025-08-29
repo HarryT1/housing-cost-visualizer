@@ -26,6 +26,19 @@ const LeafletMap = ({
     | null
   >(null);
 
+  function formatToSwedishDate(date: Date | undefined): string {
+    if (!date) return "";
+    const swedishDate = new Date(
+      date.toLocaleString("sv-SE", { timeZone: "Europe/Stockholm" })
+    );
+
+    const year = swedishDate.getFullYear();
+    const month = String(swedishDate.getMonth() + 1).padStart(2, "0");
+    const day = String(swedishDate.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`; // YYYY-MM-DD
+  }
+
   function getColor(d: number) {
     return d > 120000
       ? "#08306b" // darkest blue, above 120k
@@ -173,7 +186,6 @@ const LeafletMap = ({
   }
 
   const renderMunicipalities = async () => {
-    const temp = JSON.stringify({ fromDate: fromDate, toDate: toDate });
     const [geoRes, dataRes] = await Promise.all([
       fetch("./data/stockholm_municipalities.geojson"),
       fetch(`api/PropertyListing/AvgSqmPriceByMunicipality`, {
@@ -181,10 +193,14 @@ const LeafletMap = ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: temp,
+        body: JSON.stringify({
+          fromDate: formatToSwedishDate(fromDate),
+          toDate: formatToSwedishDate(toDate),
+        }),
       }),
     ]);
-    console.log(temp)
+
+    console.log(formatToSwedishDate(fromDate));
     const municipalityGeoData =
       (await geoRes.json()) as GeoJSON.FeatureCollection;
     const municipalityAvgSqmPrice: Record<string, number> =
@@ -239,8 +255,8 @@ const LeafletMap = ({
         },
         body: JSON.stringify({
           cellScale: cellSize * 10,
-          fromDate: fromDate,
-          toDate: toDate,
+          fromDate: formatToSwedishDate(fromDate),
+          toDate: formatToSwedishDate(toDate),
         }),
       }
     );

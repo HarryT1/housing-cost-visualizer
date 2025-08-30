@@ -1,7 +1,7 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import LeafletMap from "@/components/LeafletMap";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SidebarTrigger } from "@/components/ui/sidebar"
 
 const App = () => {

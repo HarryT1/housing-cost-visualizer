@@ -1,9 +1,6 @@
 import {
   CalendarRange,
   MapPinned,
-  SlidersHorizontal,
-  Plus,
-  Minus,
 } from "lucide-react";
 
 import {
@@ -11,12 +8,10 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 import { Slider } from "@/components/ui/slider";
@@ -24,20 +19,14 @@ import { Slider } from "@/components/ui/slider";
 import {
   DropdownMenu,
   DropdownMenuItem,
-  DropdownMenuGroup,
   DropdownMenuContent,
   DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-
-import { Calendar } from "@/components/ui/calendar";
 
 import React, { useState } from "react";
 
 import { Calendar28 } from "@/components/date-picker";
 import { Button } from "./ui/button";
-import { filterProperties } from "@turf/turf";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type AppSidebarProps = {
@@ -81,7 +70,7 @@ export function AppSidebar({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <SidebarMenuButton>
-                      <SlidersHorizontal />
+                      <CalendarRange />
                       <span>{`Ändra tidsperiod`}</span>
                     </SidebarMenuButton>
                   </DropdownMenuTrigger>

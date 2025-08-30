@@ -1,4 +1,4 @@
-import { useEffect, useRef, React } from "react";
+import { useEffect, useRef } from "react";
 import L, { Control } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import * as turf from "@turf/turf";
@@ -178,7 +178,7 @@ const LeafletMap = ({
     infoRef.current?.update();
   }
 
-  function onEachFeature(feature: GeoJSON.Feature, layer: L.Layer) {
+  function onEachFeature(_feature: GeoJSON.Feature, layer: L.Layer) {
     layer.on({
       mouseover: highlightFeature,
       mouseout: resetHighlight,
@@ -234,7 +234,7 @@ const LeafletMap = ({
 
   const renderGrid = async () => {
     // Get geographical data about stockholms län
-    const [geoRes, bboxRes] = await Promise.all([
+    const [geoRes, _] = await Promise.all([
       fetch(`api/PropertyListing/Polygon`),
       fetch(`api/PropertyListing/BoundingBox`),
     ]);

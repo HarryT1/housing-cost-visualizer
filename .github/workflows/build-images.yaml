@@ -22,7 +22,7 @@ jobs:
 
       - name: Set image names
         run: |
-          echo "FRONTEND=ghcr.io/$REPOSITORY_LC/frontend" >> $GITHUB_ENV
+          echo "NGINXFRONTEND=ghcr.io/$REPOSITORY_LC/nginx-frontend" >> $GITHUB_ENV
           echo "BACKEND=ghcr.io/$REPOSITORY_LC/backend" >> $GITHUB_ENV
 
       - name: Log in to GHCR
@@ -35,12 +35,12 @@ jobs:
       - name: Build and tag images
         run: |
 
-            docker build -t $FRONTEND:${{ github.sha }} -t $FRONTEND:latest ./frontend
+            docker build -t $NGINXFRONTEND:${{ github.sha }} -t $NGINXFRONTEND:latest ./frontend
             docker build -t $BACKEND:${{ github.sha }} -t $BACKEND:latest ./backend
 
-      - name: Push frontend and backend images
+      - name: Push nginx-frontend and backend images
         run: |
-            docker push $FRONTEND:${{ github.sha }}
-            docker push $FRONTEND:latest
+            docker push $NGINXFRONTEND:${{ github.sha }}
+            docker push $NGINXFRONTEND:latest
             docker push $BACKEND:${{ github.sha }}
             docker push $BACKEND:latest

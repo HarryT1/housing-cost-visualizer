@@ -36,7 +36,7 @@ jobs:
 
             docker compose down
 
-            docker compose -f compose.yaml pull frontend backend
+            docker compose -f compose.yaml pull nginx backend
 
             docker compose -f compose.yaml up -d
           EOF

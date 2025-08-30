@@ -33,6 +33,7 @@ services:
       - /app/node_modules
   
   nginx:
+    image: nginx:latest
     volumes:
       - ./frontend/nginx.dev.conf:/etc/nginx/conf.d/default.conf:ro
     ports:

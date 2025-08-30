@@ -187,7 +187,11 @@ const LeafletMap = ({
 
   const renderMunicipalities = async () => {
     const [geoRes, dataRes] = await Promise.all([
-      fetch("./data/stockholm_municipalities.geojson"),
+      fetch("/stockholm_municipalities.geojson", {
+        headers: {
+          Accept: "application/geo+json",
+        },
+      }),
       fetch(`api/PropertyListing/AvgSqmPriceByMunicipality`, {
         method: "POST",
         headers: {
@@ -199,11 +203,13 @@ const LeafletMap = ({
         }),
       }),
     ]);
-
-    const municipalityGeoData =
-      (await geoRes.json()) as GeoJSON.FeatureCollection;
     const municipalityAvgSqmPrice: Record<string, number> =
       await dataRes.json();
+    console.log(municipalityAvgSqmPrice);
+    const municipalityGeoData =
+      (await geoRes.json()) as GeoJSON.FeatureCollection;
+
+    console.log(municipalityGeoData);
 
     const modifiedGeoJson = {
       ...municipalityGeoData,
@@ -234,7 +240,7 @@ const LeafletMap = ({
 
   const renderGrid = async () => {
     // Get geographical data about stockholms län
-    const [geoRes, _] = await Promise.all([
+    const [geoRes] = await Promise.all([
       fetch(`api/PropertyListing/Polygon`),
       fetch(`api/PropertyListing/BoundingBox`),
     ]);

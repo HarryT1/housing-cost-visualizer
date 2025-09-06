@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import L, { Control } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import * as turf from "@turf/turf";
 
 interface LeafletMapProps {
   showGrid: boolean; // true = show grid, false = show municipalities

@@ -239,13 +239,6 @@ const LeafletMap = ({
   };
 
   const renderGrid = async () => {
-    // Get geographical data about stockholms län
-    const [geoRes] = await Promise.all([
-      fetch(`api/PropertyListing/Polygon`),
-      fetch(`api/PropertyListing/BoundingBox`),
-    ]);
-    const geojson = await geoRes.json();
-    //const { minLng, minLat, maxLng, maxLat } = await bboxRes.json();
 
     // Approximate stepsizes in latitude and longitude based on cellsize in km
     const latStep = 0.008983 * cellSize;
@@ -303,10 +296,9 @@ const LeafletMap = ({
           count: cell.count,
         },
       };
-
-      if (turf.booleanIntersects(cellPolygon, geojson)) {
-        gridCells.push(cellPolygon);
-      }
+      
+      gridCells.push(cellPolygon);
+      
     }
 
     const gridFeatureCollection: GeoJSON.FeatureCollection<GeoJSON.Polygon> = {

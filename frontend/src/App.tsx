@@ -9,7 +9,7 @@ const App = () => {
   const [showGrid, setShowGrid] = useState(true)
   const [cellSize, setCellSize] = useState(0.5)
   const [toDate, setToDate] = useState<Date | undefined>(new Date())
-  const [fromDate, setFromDate] = useState<Date | undefined>(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)) // Get the date from 90 days ago
+  const [fromDate, setFromDate] = useState<Date | undefined>(new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)) // Get the date from 365 days ago
   return (
     <SidebarProvider>
       <AppSidebar
